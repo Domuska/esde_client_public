@@ -1,0 +1,79 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".DeviceActivity">
+
+
+
+
+    <TextView
+        android:id="@+id/DeviceHierarchyPath"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textSize="15sp"
+        android:hint="@string/DevicePathHint"/>
+
+    <TextView
+        android:id="@+id/NameHelpText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/DeviceHierarchyPath"
+        android:layout_marginTop="50dp"
+        android:text="@string/DeviceNameHelpText"
+        android:textSize="10dp"/>
+
+    <TextView
+        android:id="@+id/DeviceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/NameHelpText"
+        android:layout_toEndOf="@id/NameHelpText"
+        android:layout_below="@id/NameHelpText"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"
+        android:hint="@string/DeviceNameHint"
+        />
+
+    <TextView
+        android:id="@+id/DescriptionHelpText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/DeviceName"
+        android:layout_marginTop="10dp"
+        android:text="@string/DeviceDescriptionHelpText"
+        android:textSize="10dp"/>
+
+    <TextView
+        android:id="@+id/DeviceDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/DescriptionHelpText"
+        android:layout_toRightOf="@id/NameHelpText"
+        android:layout_toEndOf="@id/NameHelpText"
+        android:layout_marginTop="10dp"
+        android:hint="@string/DeviceDescriptionHint"
+        android:textSize="20sp"/>
+
+    <!-- Used for displaying binary value device's status -->
+    <Switch
+        android:id="@+id/DeviceStatus_binary"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/DeviceSwitchText"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <!-- Used for displaying decimal value device's status -->
+    <SeekBar
+        android:id="@+id/DeviceStatus_decimal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/DeviceStatus_binary"
+        android:layout_centerHorizontal="true" />
+
+
+</RelativeLayout>

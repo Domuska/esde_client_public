@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">OHAP Client esde21</string>
+
+    <string name="action_settings">Settings</string>
+
+    <!-- Activity_device strings -->
+
+    <string name="DeviceNameHint">Name of the device</string>
+    <string name="DeviceDescriptionHint">Description of the device</string>
+    <string name="DevicePathHint">>Container Hierarchy&#60;</string>
+    <string name="DeviceSwitchText">DEVICE STATUS</string>
+    <string name="DeviceNameHelpText">DEVICE NAME</string>
+    <string name="DeviceDescriptionHelpText">DESCRIPTION</string>
+
+</resources>
