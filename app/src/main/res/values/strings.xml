@@ -11,6 +11,15 @@
     <string name="DeviceSwitchText">DEVICE STATUS</string>
     <string name="DeviceNameHelpText">DEVICE NAME</string>
     <string name="DeviceDescriptionHelpText">DESCRIPTION</string>
+    <string name="DeviceTypeHelpText">DEVICE TYPE</string>
+    <string name="DeviceTypeHint">Type of the device</string>
     <string name="DeviceSetValue">SET</string>
+    <string name="title_activity_item_list">ItemListActivity</string>
+
+
+
+    <!--entry_activity strings -->
+    <string name="entryActivity_infoText">Hello! Welcome to OHAP smart-home remote device app thingy!</string>
+    <string name="title_activity_entry">EntryActivity</string>
 
 </resources>

@@ -35,6 +35,7 @@
         android:layout_marginTop="10dp"
         android:textSize="20sp"
         android:hint="@string/DeviceNameHint"
+        android:textColor="@color/black"
         />
 
     <TextView
@@ -50,13 +51,35 @@
         android:id="@+id/DeviceDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
         android:layout_below="@id/DescriptionHelpText"
         android:layout_toRightOf="@id/NameHelpText"
         android:layout_toEndOf="@id/NameHelpText"
         android:layout_marginTop="10dp"
         android:hint="@string/DeviceDescriptionHint"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:textColor="@color/black"/>
+
+    <TextView
+        android:id="@+id/TypeHelpText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/DeviceDescription"
+        android:layout_marginTop="10dp"
+        android:text="@string/DeviceTypeHelpText"
+        android:textSize="10dp"
+        />
+
+    <TextView
+        android:id="@+id/DeviceType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/TypeHelpText"
+        android:layout_toRightOf="@id/NameHelpText"
+        android:layout_toEndOf="@id/NameHelpText"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"
+        android:hint="@string/DeviceTypeHint"
+        android:textColor="@color/black"/>
 
     <!-- Used for displaying binary value device's status -->
     <Switch
@@ -107,6 +130,7 @@
             />
 
         <Button
+            android:id="@+id/currentValue_setButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/DeviceSetValue"
