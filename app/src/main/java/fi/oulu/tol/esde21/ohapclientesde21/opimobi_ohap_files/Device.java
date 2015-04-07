@@ -1,8 +1,8 @@
-package fi.oulu.tol.esde21.ohapclientesde21.SupportPackage;
+package fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files;
 
 /**
  * A real device in an OHAP application. Inherits all common properties from the
- * {@link fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Item} base class.
+ * {@link fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item} base class.
  *
  * A device may be either a sensor or an actuator. The actual value of a sensor may be only
  * queried. For an actuator, it is also possible to change the value.
@@ -14,7 +14,7 @@ package fi.oulu.tol.esde21.ohapclientesde21.SupportPackage;
  * are used. In addition, a device provides interface to get and set the unit and unit abbreviation
  * of the decimal value.
  *
- * @see fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Item
+ * @see fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item
  *
  * @author Henrik hedberg &lt;henrik.hedberg@iki.fi>
  * @version 1.1
@@ -103,7 +103,7 @@ public class Device extends Item {
     /**
      * Constructs a new device with the parent and identifier properties.
      *
-     * @see fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Item#Item(Container, long)
+     * @see fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item#Item(Container, long)
      *
      * @param parent The parent container of the item.
      * @param id The unique identifier of the item. Must be positive integer.

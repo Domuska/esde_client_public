@@ -1,4 +1,4 @@
-package fi.oulu.tol.esde21.ohapclientesde21.SupportPackage;
+package fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files;
 
 import java.util.ArrayList;
 
@@ -8,14 +8,14 @@ import java.util.ArrayList;
  *
  * The container is not updating itself from the server before it is asked to start listening
  * updates by calling the {@link #startListening()} method. Thus, there are no children in
- * the container initially. The implementation of the {@link fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.CentralUnit}
+ * the container initially. The implementation of the {@link fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.CentralUnit}
  * may be asynchronous, meaning that the items are not immediately available after a
  * {@link #startListening()} call but will be added into the container later.
  *
  * Items add themselves automatically into and remove themselves from the container. Thus, the API
  * to modify the container is not visible outside the package.
  *
- * @see fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Item
+ * @see fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item
  *
  * @author Henrik Hedberg &lt;henrik.hedberg@iki.fi>
  * @version 1.1
@@ -49,7 +49,7 @@ public class Container extends Item {
     /**
      * Constructs a new container with the parent and identifier properties.
      *
-     * @see fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Item#Item(Container, long)
+     * @see fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item#Item(Container, long)
      *
      * @param parent The parent container of the item. May be null, if this the root container of a central unit.
      * @param id The unique identifier of the item. Must be positive integer.

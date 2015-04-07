@@ -11,5 +11,6 @@
     <string name="DeviceSwitchText">DEVICE STATUS</string>
     <string name="DeviceNameHelpText">DEVICE NAME</string>
     <string name="DeviceDescriptionHelpText">DESCRIPTION</string>
+    <string name="DeviceSetValue">SET</string>
 
 </resources>

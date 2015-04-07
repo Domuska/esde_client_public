@@ -1,4 +1,4 @@
-package fi.oulu.tol.esde21.ohapclientesde21.SupportPackage;
+package fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files;
 
 import java.util.ArrayList;
 

@@ -1,10 +1,10 @@
-package fi.oulu.tol.esde21.ohapclientesde21;
+package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import java.net.URL;
 
-import fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.CentralUnit;
-import fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Container;
-import fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Device;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.CentralUnit;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 
 /**
  * Created by Domu on 05-Apr-15.

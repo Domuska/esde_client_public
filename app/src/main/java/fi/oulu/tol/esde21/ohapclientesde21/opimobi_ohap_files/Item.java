@@ -1,4 +1,4 @@
-package fi.oulu.tol.esde21.ohapclientesde21.SupportPackage;
+package fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files;
 
 /**
  * A base object holding all common properties of an item in an OHAP application.

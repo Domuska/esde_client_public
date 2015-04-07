@@ -67,13 +67,53 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
+
     <!-- Used for displaying decimal value device's status -->
     <SeekBar
         android:id="@+id/DeviceStatus_decimal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/layoutForEditText"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/text_maxvalue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/DeviceStatus_binary"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        />
+
+    <TextView
+        android:id="@+id/text_minvalue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/layoutForEditText">
+
+        <EditText
+            android:id="@+id/editText_currentValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/DeviceSetValue"
+            android:onClick="setValue"
+            />
+
+    </LinearLayout>
 
 
 </RelativeLayout>

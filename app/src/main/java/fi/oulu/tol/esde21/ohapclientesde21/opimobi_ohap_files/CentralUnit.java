@@ -1,4 +1,4 @@
-package fi.oulu.tol.esde21.ohapclientesde21.SupportPackage;
+package fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -14,7 +14,7 @@ import java.util.HashMap;
  * central unit provides {@link #getItemById(long)} method to retrieve an item from any
  * level of the container hierarchy by specifying the identifier of the item.
  *
- * @see fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Container
+ * @see fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container
  *
  * @author Henrik hedberg &lt;henrik.hedberg@iki.fi>
  * @version 1.2
@@ -58,12 +58,12 @@ public abstract class CentralUnit extends Container {
     /**
      * Asks the central unit to change the value of the specified actuator device, of which value
      * type is binary. The method is called only by the
-     * {@link fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Device#changeBinaryValue(boolean)} method, which also verifies the
+     * {@link fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device#changeBinaryValue(boolean)} method, which also verifies the
      * prerequisites for the request.
      *
      * This method is abstract and must be provided by the implementation.
      *
-     * @see fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Device#changeBinaryValue(boolean)
+     * @see fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device#changeBinaryValue(boolean)
      * @param device The device of which state is asked to be changed.
      * @param value The new binary value for the device.
      */
@@ -72,12 +72,12 @@ public abstract class CentralUnit extends Container {
     /**
      * Asks the central unit to change the value of the specified actuator device, of which value
      * type is decimal. The method is called only by the
-     * {@link fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Device#changeDecimalValue(double)} method, which also verifies the
+     * {@link fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device#changeDecimalValue(double)} method, which also verifies the
      * prerequisites for the request.
      *
      * This method is abstract and must be provided by the implementation.
      *
-     * @see fi.oulu.tol.esde21.ohapclientesde21.SupportPackage.Device#changeDecimalValue(double)
+     * @see fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device#changeDecimalValue(double)
      * @param device The device of which state is asked to be changed.
      * @param value The new binary value for the device.
      */
