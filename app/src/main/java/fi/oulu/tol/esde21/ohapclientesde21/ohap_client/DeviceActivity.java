@@ -12,11 +12,7 @@ import android.widget.SeekBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import fi.oulu.tol.esde21.ohapclientesde21.R;
-import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.CentralUnit;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 
 
@@ -35,7 +31,7 @@ public class DeviceActivity extends ActionBarActivity {
     Switch aSwitch;
     Button setButton;
 
-
+    Boolean isTracked;
 
 
 
@@ -44,7 +40,7 @@ public class DeviceActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device);
 
-        int deviceId = getIntent().getIntExtra("deviceId", 0);
+        long deviceId = getIntent().getLongExtra("deviceId", 0);
 
         /*try {
             URL url = new URL("http://ohap.opimobi.com:8080/");
@@ -64,7 +60,10 @@ public class DeviceActivity extends ActionBarActivity {
         device.setName("A bloody ceiling lamp");
         device.setDescription("A lamp. In ceiling. It is not actually bloody.");*/
 
-        aDevice = ItemListActivity.deviceList.get(deviceId);
+
+        //get the item from the ItemListActivity's public list of items, cast it into Device.
+        //This might be a source of bugs, since here there are no checks if the item we get is an actual device or not
+        aDevice = (Device)EntryActivity.getCentralUnitItem(deviceId);
 
         deviceName = (TextView) findViewById(R.id.DeviceName);
         deviceName.setText(aDevice.getName());

@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -15,7 +16,9 @@ import java.util.ArrayList;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.CentralUnit;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
 
 /**
  * Created by Domu on 07-Apr-15.
@@ -23,12 +26,24 @@ import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
  * Activity for displaying a list that holds a number of Items
  */
 
+
+//TODO:
 public class ItemListActivity extends ActionBarActivity {
 
     CentralUnit centralUnit;
     Device device;
-    public static ArrayList<Device> deviceList;
+
+    //public list of items that are in the list. This wont work in future.
+    //public static ArrayList<Item> itemList;
+
+    private final static String EXTRA_CONTAINER_ID = "containerId";
+    private final static String EXTRA_PREFIX_STRING = "prefixData";
+
     ListView listView;
+    String extraPrefix;
+
+    //the id for the container of this hierarchy
+    String extraContainerId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,17 +53,35 @@ public class ItemListActivity extends ActionBarActivity {
         //populate list with dummy data
         populateList();
 
+        extraPrefix = getIntent().getStringExtra(EXTRA_PREFIX_STRING);
+        extraContainerId = getIntent().getStringExtra(EXTRA_CONTAINER_ID);
+
         listView = (ListView) findViewById(R.id.deviceListView);
-        listView.setAdapter(new OhapListAdapter("prefixi ", deviceList));
+        listView.setAdapter(new OhapListAdapter(extraPrefix + "/", extraContainerId));
+
 
         //listener for list's items
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(ItemListActivity.this, DeviceActivity.class);
-                //TODO: is this the right number to pass to the activity? are we sure that the position is the same as item's ID in our arraylist?
-                i.putExtra("deviceId", position);
-                startActivity(i);
+
+                //if the selected element is container, open a new list, else open the device page
+                if(EntryActivity.getCentralUnitItem(id) instanceof Container){
+
+
+                    Intent containerIntent = new Intent(ItemListActivity.this, ItemListActivity.class);
+                    containerIntent.putExtra("prefixData", extraPrefix);
+                    containerIntent.putExtra(EXTRA_CONTAINER_ID, Long.toString(id));
+                    startActivity(containerIntent);
+
+                }
+                else {
+                    Intent deviceIntent = new Intent(ItemListActivity.this, DeviceActivity.class);
+                    //as id we need to query entryactivity for an item and ask its' id
+                    deviceIntent.putExtra("deviceId", id);
+                    startActivity(deviceIntent);
+                }
             }
         });
 
@@ -57,8 +90,9 @@ public class ItemListActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_item_list, menu);
+
+        //commented out because we don't actually want a menu in the item list, should propably delete the xml as well if menus will not be added here
+        //getMenuInflater().inflate(R.menu.menu_item_list, menu);
         return true;
     }
 
@@ -80,42 +114,10 @@ public class ItemListActivity extends ActionBarActivity {
     //populate list with dummy data
     private void populateList(){
 
-        try {
-            URL url = new URL("http://ohap.opimobi.com:8080/");
-            centralUnit = new ConcreteCentralUnit(url) {
-            };
-        }
-        catch (MalformedURLException e){
-            //do stuff with the exception...
-        }
-
-        centralUnit.setName("OHAP Test server");
-
-        device = new Device(centralUnit, 1, Device.Type.ACTUATOR, Device.ValueType.DECIMAL );
-        device.setDecimalValue(70);
-        device.setMinMaxValues(0,100);
-
-        device.setName("A bloody ceiling lamp");
-        device.setDescription("A lamp. In ceiling. It is not actually bloody.");
-
-        deviceList = new ArrayList<>();
-        deviceList.add(device);
 
 
-        Device device2 = new Device (centralUnit, 2, Device.Type.ACTUATOR, Device.ValueType.BINARY);
-        device2.setName("Another sodding lamp");
-        device2.setDescription("Old lamp. On or off.");
-        device2.changeBinaryValue(true);
 
 
-        deviceList.add(device2);
-
-        Device device3 = new Device (centralUnit, 3, Device.Type.SENSOR, Device.ValueType.BINARY);
-        device3.setName("Fancy hi-tech button lamp");
-        device3.setDescription("a sensor for a fancy lamp");
-        device3.setBinaryValue(true);
-
-        deviceList.add(device3);
 
 
 

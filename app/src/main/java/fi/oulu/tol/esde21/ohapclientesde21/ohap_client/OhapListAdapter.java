@@ -10,7 +10,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
 
 /**
  * Created by Domu on 07-Apr-15.
@@ -22,11 +24,13 @@ import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 public class OhapListAdapter implements android.widget.ListAdapter {
 
     private String prefix;
-    private ArrayList<Device> _deviceList;
+    private String containerId;
 
-    public OhapListAdapter(String str, ArrayList<Device> deviceList){
-        this.prefix = str;
-        _deviceList = deviceList;
+    Container container;
+
+    public OhapListAdapter(String prefix, String containerId){
+        this.prefix = prefix;
+        this.containerId = containerId;
 
     }
 
@@ -51,10 +55,11 @@ public class OhapListAdapter implements android.widget.ListAdapter {
 
     }
 
-    //here we should actually return the real amount of items we have
+    //here we should actually return the amount of items we have in this container
     @Override
     public int getCount() {
-        return _deviceList.size();
+        container = (Container)EntryActivity.getCentralUnitItem(Long.parseLong(containerId));
+        return container.getItemCount();
     }
 
     @Override
@@ -62,9 +67,11 @@ public class OhapListAdapter implements android.widget.ListAdapter {
         return null;
     }
 
+
+    // ask the container f
     @Override
     public long getItemId(int position) {
-        return position;
+        return container.getItemByIndex(position).getId();
     }
 
     @Override
@@ -89,10 +96,11 @@ public class OhapListAdapter implements android.widget.ListAdapter {
             viewHolder.rowTextView = (TextView)convertView.findViewById(R.id.rowTextView);
             convertView.setTag(viewHolder);
         }
-        else
-            viewHolder = (ViewHolder)convertView.getTag();
+        else {
+            viewHolder = (ViewHolder) convertView.getTag();
+        }
 
-        viewHolder.rowTextView.setText(prefix + _deviceList.get(position).getName());
+        viewHolder.rowTextView.setText(prefix + container.getItemByIndex(position).getName());
 
         return convertView;
     }
