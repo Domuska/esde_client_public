@@ -6,4 +6,14 @@
     <color name="blue">#0000FF</color>
 
 
+    <color name="light_yellow">#FFF02C</color>
+    <color name="dark_purple">#4A1BB2</color>
+
+    <color name="poison_green">#A6FF09</color>
+    <color name="red_orange">#CC391B</color>
+
+
+    <!-- <color name=""></color> -->
+
+
 </resources>
