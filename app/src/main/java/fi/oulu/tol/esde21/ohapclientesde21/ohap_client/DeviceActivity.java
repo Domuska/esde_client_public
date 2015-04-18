@@ -1,5 +1,6 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
+import android.app.Activity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,7 +17,7 @@ import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 
 
-public class DeviceActivity extends ActionBarActivity {
+public class DeviceActivity extends Activity {
 
     //CentralUnit centralUnit;
     //Device device;

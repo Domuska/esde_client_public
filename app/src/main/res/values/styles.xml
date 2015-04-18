@@ -1,40 +1,57 @@
-<resources>
+﻿<resources>
 
     <!-- Base application theme. -->
-    <style name="myTheme" parent="Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
-
-
-
+    <style name="myTheme" parent="android:Theme.Holo.Light">
 
         <!-- Action bar style -->
-        <item name="android:actionBarStyle">@style/myTheme.ActionBarStyle</item>
-        <!-- Support library compatibility -->
-        <item name="actionBarStyle">@style/myTheme.ActionBarStyle</item>
+        <item name="android:actionBarStyle">@style/myTheme.ActionBarColours</item>
+        <item name="android:actionOverflowButtonStyle">@style/myTheme.ActionBarOverflowButtonStyle</item>
+        <!-- The next row is if we want to change the colour / drawable of the overflow menu background -->
+        <!-- <item name="android:popupMenuStyle">@style/myTheme.popupMenuStyle</item> -->
+
+
+        <!-- old support library compatibility -->
+        <!-- <item name="actionBarStyle">@style/myTheme.ActionBarStyle</item> -->
 
     </style>
 
 
 
-    <style name="myTheme.ActionBarStyle" parent="@style/Widget.AppCompat.Light.ActionBar">
+    <style name="myTheme.ActionBarColours" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
 
         <!-- Title text colour -->
         <item name="android:titleTextStyle">@style/myTheme.ActionBarTextStyle</item>
-        <item name="titleTextStyle">@style/myTheme.ActionBarTextStyle</item>
-
-
-        <item name="background">@color/light_yellow</item>
+        <!-- Action bar background colour -->
         <item name="android:background">@color/light_yellow</item>
+
+
+        <!-- Old support dependency -->
+        <!-- <item name="titleTextStyle">@style/myTheme.ActionBarTextStyle</item> -->
+
+
+        <!-- Old support dependency -->
+        <!-- <item name="background">@color/light_yellow</item> -->
+
     </style>
 
-    <style name="myTheme.ActionBarBackground" parent= "@style/myTheme.ActionBarStyle">
-
-
-    </style>
-
-    <style name="myTheme.ActionBarTextStyle" parent = "@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+    <!-- Title text colour -->
+    <style name="myTheme.ActionBarTextStyle" parent = "@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
         <item name="android:textColor">@color/black</item>
+    </style>
 
+    <!-- Overflow menu icon -->
+    <style name="myTheme.ActionBarOverflowButtonStyle" parent ="@android:style/Widget.Holo.Light.ActionButton.Overflow">
+
+        <item name ="android:src">@drawable/ic_more_vert_black_24dp</item>
+
+    </style>
+
+    <!-- For changing the background of the overflow menu
+     http://stackoverflow.com/questions/19659637/how-to-change-the-background-color-of-action-bars-option-menu-in-android-4-2 JA
+     http://scriptedpapers.com/2014/08/12/android-action-bar-overflow-menu-customization/ -->
+    <style name="myTheme.popupMenuStyle" parent="android:Widget.Holo.Light.ListPopupWindow">
+
+        <item name="android:popupBackground">@color/blue</item>
 
     </style>
 

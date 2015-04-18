@@ -1,5 +1,6 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -17,7 +18,7 @@ import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
 
-public class EntryActivity extends ActionBarActivity {
+public class EntryActivity extends Activity {
 
     static ConcreteCentralUnit centralUnit;
     private final static String EXTRA_CONTAINER_ID = "containerId";
@@ -27,6 +28,8 @@ public class EntryActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entry);
+
+
 
         try {
             URL url = new URL("http://ohap.opimobi.com:8080/");

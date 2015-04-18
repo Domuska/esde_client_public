@@ -1,5 +1,6 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -28,7 +29,7 @@ import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
 
 
 //TODO:
-public class ItemListActivity extends ActionBarActivity {
+public class ItemListActivity extends Activity {
 
     CentralUnit centralUnit;
     Device device;
