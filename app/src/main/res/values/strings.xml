@@ -23,5 +23,6 @@
     <!--entry_activity strings -->
     <string name="entryActivity_infoText">Hello! Welcome to OHAP smart-home remote device app thingy!</string>
     <string name="title_activity_entry">EntryActivity</string>
+    <string name="entryActivity_buttonText">ENTER!</string>
 
 </resources>

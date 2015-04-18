@@ -1,6 +1,15 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.Context;
+import android.content.Intent;
+import android.os.CountDownTimer;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -27,12 +36,20 @@ public class DeviceActivity extends Activity {
     TextView deviceMinValue;
     TextView deviceMaxValue;
     TextView deviceType;
+    TextView devicePath;
     EditText currentValue;
     SeekBar seekbar;
     Switch aSwitch;
     Button setButton;
 
-    Boolean isTracked;
+
+    // let's use a hard coded value for now, perhaps later on put
+    // the value into sharedPreferences?
+    Boolean isTracked = true;
+    String prefixString;
+
+    static final String DEVICE_ID = "deviceId";
+    private final static String EXTRA_PREFIX_STRING = "prefixData";
 
 
 
@@ -41,7 +58,9 @@ public class DeviceActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device);
 
-        long deviceId = getIntent().getLongExtra("deviceId", 0);
+        long deviceId = getIntent().getLongExtra(DEVICE_ID, 0);
+        prefixString = getIntent().getStringExtra(EXTRA_PREFIX_STRING);
+
 
         /*try {
             URL url = new URL("http://ohap.opimobi.com:8080/");
@@ -72,6 +91,8 @@ public class DeviceActivity extends Activity {
         deviceDescription = (TextView) findViewById(R.id.DeviceDescription);
         deviceDescription.setText(aDevice.getDescription());
 
+        devicePath = (TextView) findViewById(R.id.DeviceHierarchyPath);
+        devicePath.setText(prefixString);
 
         seekbar = (SeekBar) findViewById(R.id.DeviceStatus_decimal);
         aSwitch = (Switch) findViewById(R.id.DeviceStatus_binary);
@@ -142,11 +163,68 @@ public class DeviceActivity extends Activity {
             deviceType.setText("Actuator");
 
 
-
-
-
-
         setTitle(aDevice.getName());
+
+
+        // set the up the "up" navigation
+        // TODO: k‰ytet‰‰n ehk‰ itemListActivityss‰ onSaveInstanceState tai jotain
+        // tallentamaan polku tai containerin id? N‰in t‰m‰ ei toimi, sill‰
+        // aktiviteetti aloitetaan uudestaan ja itemlistactivity tarvii ekstroina ainakin containerin
+        // (t‰n devicen parentin) id:n.
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
+
+
+
+
+        // create a notification to be fired when the activity is created (this will change later to actually respond to changes in the actual device)
+        // http://developer.android.com/guide/topics/ui/notifiers/notifications.html#CreateNotification
+        final NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this).
+                        setSmallIcon(R.drawable.ic_system_update_white_24dp).
+                        setContentTitle(aDevice.getName()).
+                setContentText("Something happened to this device...");
+
+        Intent resultIntent = new Intent(this, DeviceActivity.class);
+        resultIntent.putExtra(DEVICE_ID, deviceId);
+
+
+        //requires API level 16
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+
+        stackBuilder.addParentStack(DeviceActivity.class);
+        stackBuilder.addNextIntent(resultIntent);
+
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        mBuilder.setContentIntent(resultPendingIntent);
+
+
+
+
+        final NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        //mNotificationManager.notify(1, mBuilder.build());
+
+
+        if(isTracked == true) {
+            new CountDownTimer(10000, 1000) {
+
+
+                @Override
+                public void onFinish() {
+                    mNotificationManager.notify(1, mBuilder.build());
+                }
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    //do nothing
+                }
+            }.start();
+        }
+
+
 
     }
 
@@ -165,15 +243,27 @@ public class DeviceActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.monitor_enable) {
+            isTracked = true;
             return true;
         }
+        if(id == R.id.monitor_disable){
+            isTracked = false;
+            return true;
+        }
+        if(id == android.R.id.home){
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+
+        }
+
 
         return super.onOptionsItemSelected(item);
     }
 
-    //implementation of the set button
+    //implementation of the "set" button
     public void setValue (View v){
 
         double newValue = -1;

@@ -39,8 +39,11 @@ public class ItemListActivity extends Activity {
 
     private final static String EXTRA_CONTAINER_ID = "containerId";
     private final static String EXTRA_PREFIX_STRING = "prefixData";
+    static final String DEVICE_ID = "deviceId";
 
     ListView listView;
+
+    // string holding the "path" of the item
     String extraPrefix;
 
     //the id for the container of this hierarchy
@@ -51,40 +54,46 @@ public class ItemListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
 
-        //populate list with dummy data
+        // populate list with dummy data
         populateList();
 
-        extraPrefix = getIntent().getStringExtra(EXTRA_PREFIX_STRING);
+        // get the current path of the item
+        extraPrefix = getIntent().getStringExtra(EXTRA_PREFIX_STRING) + "/";
         extraContainerId = getIntent().getStringExtra(EXTRA_CONTAINER_ID);
 
         listView = (ListView) findViewById(R.id.deviceListView);
-        listView.setAdapter(new OhapListAdapter(extraPrefix + "/", extraContainerId));
+        listView.setAdapter(new OhapListAdapter(extraPrefix, extraContainerId));
 
 
-        //listener for list's items
-
+        // listener for list's items
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 //if the selected element is container, open a new list, else open the device page
-                if(EntryActivity.getCentralUnitItem(id) instanceof Container){
+                if (EntryActivity.getCentralUnitItem(id) instanceof Container) {
 
+                    // set the file path to contain the container's name
+                    extraPrefix += EntryActivity.getCentralUnitItem(id).getName();
 
                     Intent containerIntent = new Intent(ItemListActivity.this, ItemListActivity.class);
-                    containerIntent.putExtra("prefixData", extraPrefix);
+                    containerIntent.putExtra(EXTRA_PREFIX_STRING, extraPrefix);
                     containerIntent.putExtra(EXTRA_CONTAINER_ID, Long.toString(id));
                     startActivity(containerIntent);
 
-                }
-                else {
+                } else {
                     Intent deviceIntent = new Intent(ItemListActivity.this, DeviceActivity.class);
-                    //as id we need to query entryactivity for an item and ask its' id
-                    deviceIntent.putExtra("deviceId", id);
+
+                    //give the ID of the device and its' path as extra to the activity
+                    deviceIntent.putExtra(DEVICE_ID, id);
+                    deviceIntent.putExtra(EXTRA_PREFIX_STRING, extraPrefix);
                     startActivity(deviceIntent);
                 }
             }
         });
+
+        // set the up the "up" navigation
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 

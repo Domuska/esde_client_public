@@ -12,14 +12,14 @@
         android:gravity="center_horizontal"
         android:textSize="@dimen/abc_text_size_headline_material"/>
 
-    <ImageButton
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="openList"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:src="@drawable/ic_chevron_right_black_36dp"
         android:background="@color/transparent"
+        android:onClick="openList"
+        android:text="@string/entryActivity_buttonText"
         />
 
 </RelativeLayout>
