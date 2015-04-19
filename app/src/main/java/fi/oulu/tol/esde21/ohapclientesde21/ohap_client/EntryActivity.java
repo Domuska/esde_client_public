@@ -119,8 +119,8 @@ public class EntryActivity extends Activity {
 
 
         Device device3 = new Device (centralUnit, 3, Device.Type.SENSOR, Device.ValueType.BINARY);
-        device3.setName("Fancy hi-tech button lamp");
-        device3.setDescription("a sensor for a fancy lamp");
+        device3.setName("Fancy hi-tech lamp's sensor");
+        device3.setDescription("Sensor sensing the fancy lamp.");
         device3.setBinaryValue(true);
 
         Container container1 = new Container(centralUnit, 4);
@@ -130,6 +130,19 @@ public class EntryActivity extends Activity {
 
         Device device4 = new Device(container1, 5, Device.Type.ACTUATOR, Device.ValueType.BINARY);
         device4.setName("hahaa!");
+
+
+        // let's create a couple more to for testing memory usage and responsiveness...
+        for(int i = 6; i < 155; i++){
+
+            Device deviceFor = new Device(container1, i, Device.Type.SENSOR, Device.ValueType.DECIMAL);
+            deviceFor.setName("Markku Markkula proximity sensor");
+            deviceFor.setDescription("Sensor for calculating the propability of Markku Markkula approaching");
+            deviceFor.setMinMaxValues(0, 100);
+
+            deviceFor.setDecimalValue(5);
+        }
+
     }
 
 }

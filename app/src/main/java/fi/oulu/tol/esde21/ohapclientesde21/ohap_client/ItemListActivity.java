@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,6 +38,7 @@ public class ItemListActivity extends Activity {
     //public list of items that are in the list. This wont work in future.
     //public static ArrayList<Item> itemList;
 
+    private static final String TAG= "ItemListActivity";
     private final static String EXTRA_CONTAINER_ID = "containerId";
     private final static String EXTRA_PREFIX_STRING = "prefixData";
     static final String DEVICE_ID = "deviceId";
@@ -58,8 +60,12 @@ public class ItemListActivity extends Activity {
         populateList();
 
         // get the current path of the item
+        Log.d(TAG, "Getting prefix string");
         extraPrefix = getIntent().getStringExtra(EXTRA_PREFIX_STRING) + "/";
+        Log.d(TAG, "Extra string: " + extraPrefix);
+        //TODO: if up navigation from deviceActivity is enabled, here we will come crashing and burning down
         extraContainerId = getIntent().getStringExtra(EXTRA_CONTAINER_ID);
+        Log.d(TAG, "Gotten container ID Extra: " + extraContainerId);
 
         listView = (ListView) findViewById(R.id.deviceListView);
         listView.setAdapter(new OhapListAdapter(extraPrefix, extraContainerId));
@@ -69,6 +75,9 @@ public class ItemListActivity extends Activity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                Log.d(TAG, "Starting list onItemClick");
+                Log.d(TAG, "Position: " + Integer.toString(position) + "Id: " + Long.toString(id));
 
                 //if the selected element is container, open a new list, else open the device page
                 if (EntryActivity.getCentralUnitItem(id) instanceof Container) {

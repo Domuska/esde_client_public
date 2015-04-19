@@ -50,6 +50,7 @@ public class DeviceActivity extends Activity {
 
     static final String DEVICE_ID = "deviceId";
     private final static String EXTRA_PREFIX_STRING = "prefixData";
+    private static final String TAG = "DeviceActivity";
 
 
 
@@ -171,7 +172,7 @@ public class DeviceActivity extends Activity {
         // tallentamaan polku tai containerin id? Näin tämä ei toimi, sillä
         // aktiviteetti aloitetaan uudestaan ja itemlistactivity tarvii ekstroina ainakin containerin
         // (tän devicen parentin) id:n.
-        //getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
 
 
@@ -254,7 +255,12 @@ public class DeviceActivity extends Activity {
             return true;
         }
         if(id == android.R.id.home){
-            NavUtils.navigateUpFromSameTask(this);
+            Intent i = NavUtils.getParentActivityIntent(this);
+            // if the activity is on Android's back stack, do not recreate the activity
+            // but rather bring the existing activity forth (the itemListActivity)
+            // credit to yonojoy @ http://stackoverflow.com/questions/13293772/how-to-navigate-up-to-the-same-parent-state/17342137#17342137
+            i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            NavUtils.navigateUpTo(this, i);
             return true;
 
         }
