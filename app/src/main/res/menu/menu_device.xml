@@ -7,13 +7,15 @@
     <item android:id="@+id/monitor_enable"
         android:title="@string/action_enable_monitoring"
         android:orderInCategory="1"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        android:icon="@drawable/ic_sync_black_24dp"/>
 
     <item
         android:id="@+id/monitor_disable"
         android:title="@string/action_disable_monitoring"
         android:orderInCategory="2"
-        app:showAsAction="never" />
+        app:showAsAction="never"
+        android:icon="@drawable/ic_sync_disabled_black_24dp"/>
 
 
 
