@@ -2,6 +2,7 @@ package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +24,13 @@ import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
 
 public class OhapListAdapter implements android.widget.ListAdapter {
 
+    static final String TAG = "OhapListAdapter";
+    //this followin prefix string is not actually utilized anywhere, we can perhaps delete it in future but let's leave it for now
     private String prefix;
     private String containerId;
+    //this is t he real prefix used in the program now.
+    String itemPrefix;
+
 
     Container container;
 
@@ -55,20 +61,21 @@ public class OhapListAdapter implements android.widget.ListAdapter {
 
     }
 
-    //here we should actually return the amount of items we have in this container
+
     @Override
     public int getCount() {
         container = (Container)EntryActivity.getCentralUnitItem(Long.parseLong(containerId));
         return container.getItemCount();
     }
 
+    //TODO: does this even work correctly?
     @Override
     public Object getItem(int position) {
-        return null;
+        return EntryActivity.getCentralUnitItem(position);
     }
 
 
-    // ask the container f
+    // ask the container for the id of the item of this index
     @Override
     public long getItemId(int position) {
         return container.getItemByIndex(position).getId();
@@ -100,8 +107,32 @@ public class OhapListAdapter implements android.widget.ListAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        viewHolder.rowTextView.setText(prefix + container.getItemByIndex(position).getName());
+        //old way of building the item's path
+        //viewHolder.rowTextView.setText(prefix + container.getItemByIndex(position).getName());
 
+
+        // build the prefix for the item's "path"
+        //Container parentVariable = EntryActivity.getCentralUnitItem(getItemId(position)).getParent();
+        Container parentVariable = container.getParent();
+        itemPrefix = "";
+
+        if(parentVariable != null) {
+
+            Log.d(TAG, "Starting do-while loop");
+            Log.d(TAG, "Parent name: " + parentVariable.getName());
+            do {
+
+                itemPrefix = parentVariable.getName() + "/" + itemPrefix;
+                parentVariable = parentVariable.getParent();
+
+            } while (parentVariable != null);
+
+        }
+        else{
+            itemPrefix = container.getName() + "/";
+        }
+
+        viewHolder.rowTextView.setText(itemPrefix + container.getItemByIndex(position).getName());
         return convertView;
     }
 

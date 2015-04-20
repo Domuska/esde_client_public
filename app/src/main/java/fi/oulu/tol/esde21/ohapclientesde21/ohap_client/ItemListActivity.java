@@ -29,16 +29,10 @@ import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
  */
 
 
-//TODO:
 public class ItemListActivity extends Activity {
 
-    CentralUnit centralUnit;
-    Device device;
 
-    //public list of items that are in the list. This wont work in future.
-    //public static ArrayList<Item> itemList;
-
-    private static final String TAG= "ItemListActivity";
+    private static final String TAG = "ItemListActivity";
     private final static String EXTRA_CONTAINER_ID = "containerId";
     private final static String EXTRA_PREFIX_STRING = "prefixData";
     static final String DEVICE_ID = "deviceId";
@@ -56,20 +50,16 @@ public class ItemListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
 
-        // populate list with dummy data
-        populateList();
 
         // get the current path of the item
-        Log.d(TAG, "Getting prefix string");
         extraPrefix = getIntent().getStringExtra(EXTRA_PREFIX_STRING) + "/";
         Log.d(TAG, "Extra string: " + extraPrefix);
-        //TODO: if up navigation from deviceActivity is enabled, here we will come crashing and burning down
+
         extraContainerId = getIntent().getStringExtra(EXTRA_CONTAINER_ID);
         Log.d(TAG, "Gotten container ID Extra: " + extraContainerId);
 
         listView = (ListView) findViewById(R.id.deviceListView);
         listView.setAdapter(new OhapListAdapter(extraPrefix, extraContainerId));
-
 
         // listener for list's items
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -77,7 +67,7 @@ public class ItemListActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 Log.d(TAG, "Starting list onItemClick");
-                Log.d(TAG, "Position: " + Integer.toString(position) + "Id: " + Long.toString(id));
+                Log.d(TAG, "Position: " + Integer.toString(position) + " Id: " + Long.toString(id));
 
                 //if the selected element is container, open a new list, else open the device page
                 if (EntryActivity.getCentralUnitItem(id) instanceof Container) {
@@ -130,15 +120,5 @@ public class ItemListActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    //populate list with dummy data
-    private void populateList(){
 
-
-
-
-
-
-
-
-    }
 }

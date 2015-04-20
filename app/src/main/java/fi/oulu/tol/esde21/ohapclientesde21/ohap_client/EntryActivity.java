@@ -85,19 +85,20 @@ public class EntryActivity extends Activity {
     //class method for getting containers in the CU (or the CU itself).
     //gets an ID for the container that is wanted and returns the container in question,
     //it can be either a subcontainer in the central unit or the central unit itself.
+
+    /**
+     *
+     * @param id for the item to be returned
+     * @return returns item under the central unit with the given ID, or the central unit itself
+     */
     public static Item getCentralUnitItem(long id){
 
         if(id == centralUnit.getId()){
-
             return centralUnit;
-
         }
         else{
-
             return centralUnit.getItemById(id);
-
         }
-
     }
 
 
@@ -125,15 +126,21 @@ public class EntryActivity extends Activity {
 
         Container container1 = new Container(centralUnit, 4);
         container1.setName("Seppo's working room");
-        container1.setDescription("The wonderful room of Seppo, 5/5");
+        container1.setDescription("The wonderful room of Seppo, 5/5. No one will see this text!");
 
+        Container container2 = new Container(centralUnit, 6);
+        container2.setName("Hermandos' Working Closet");
 
         Device device4 = new Device(container1, 5, Device.Type.ACTUATOR, Device.ValueType.BINARY);
-        device4.setName("hahaa!");
+        device4.setName("Surprise device!");
 
+
+
+        Container container3 = new Container(container1, 7);
+        container3.setName("Seppo's room's broom closet");
 
         // let's create a couple more to for testing memory usage and responsiveness...
-        for(int i = 6; i < 155; i++){
+        for(int i = 8; i < 155; i++){
 
             Device deviceFor = new Device(container1, i, Device.Type.SENSOR, Device.ValueType.DECIMAL);
             deviceFor.setName("Markku Markkula proximity sensor");

@@ -27,13 +27,12 @@ import android.widget.TextView;
 import java.lang.reflect.Method;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 
 
 public class DeviceActivity extends Activity {
 
-    //CentralUnit centralUnit;
-    //Device device;
     Device aDevice;
     TextView deviceName;
     TextView deviceDescription;
@@ -50,10 +49,8 @@ public class DeviceActivity extends Activity {
     // let's use a hard coded value for now, perhaps later on put
     // the value into sharedPreferences?
     Boolean isTracked = true;
-    String prefixString;
 
     static final String DEVICE_ID = "deviceId";
-    private final static String EXTRA_PREFIX_STRING = "prefixData";
     private static final String TAG = "DeviceActivity";
 
 
@@ -64,26 +61,9 @@ public class DeviceActivity extends Activity {
         setContentView(R.layout.activity_device);
 
         long deviceId = getIntent().getLongExtra(DEVICE_ID, 0);
-        prefixString = getIntent().getStringExtra(EXTRA_PREFIX_STRING);
 
 
-        /*try {
-            URL url = new URL("http://ohap.opimobi.com:8080/");
-            centralUnit = new ConcreteCentralUnit(url) {
-            };
-        }
-        catch (MalformedURLException e){
-            //do stuff with the exception...
-        }*/
 
-        /*centralUnit.setName("OHAP Test server");
-
-        device = new Device(centralUnit, 1, Device.Type.ACTUATOR, Device.ValueType.DECIMAL );
-        device.setDecimalValue(70);
-        device.setMinMaxValues(0,100);
-
-        device.setName("A bloody ceiling lamp");
-        device.setDescription("A lamp. In ceiling. It is not actually bloody.");*/
 
 
         //get the item from the ItemListActivity's public list of items, cast it into Device.
@@ -97,7 +77,6 @@ public class DeviceActivity extends Activity {
         deviceDescription.setText(aDevice.getDescription());
 
         devicePath = (TextView) findViewById(R.id.DeviceHierarchyPath);
-        devicePath.setText(prefixString);
 
         seekbar = (SeekBar) findViewById(R.id.DeviceStatus_decimal);
         aSwitch = (Switch) findViewById(R.id.DeviceStatus_binary);
@@ -162,6 +141,7 @@ public class DeviceActivity extends Activity {
             currentValue.setEnabled(false);
             aSwitch.setEnabled(false);
             deviceType.setText("Sensor");
+            setButton.setEnabled(false);
         }
         //set device type text actuator
         else
@@ -171,13 +151,24 @@ public class DeviceActivity extends Activity {
         setTitle(aDevice.getName());
 
 
-        // set the up the "up" navigation
-        // TODO: k‰ytet‰‰n ehk‰ itemListActivityss‰ onSaveInstanceState tai jotain
-        // tallentamaan polku tai containerin id? N‰in t‰m‰ ei toimi, sill‰
-        // aktiviteetti aloitetaan uudestaan ja itemlistactivity tarvii ekstroina ainakin containerin
-        // (t‰n devicen parentin) id:n.
+        // set the up the "up" navigation enabled
         getActionBar().setDisplayHomeAsUpEnabled(true);
 
+
+        Container parentVariable = aDevice.getParent();
+        String prefix_ = "";
+
+        Log.d(TAG, "Starting do-while loop");
+        Log.d(TAG, "Parent name: " + parentVariable.getName());
+        do {
+
+            prefix_ = parentVariable.getName() + "/" + prefix_;
+            parentVariable = parentVariable.getParent();
+
+        } while (parentVariable != null);
+
+
+        devicePath.setText(prefix_);
 
 
 
@@ -298,7 +289,7 @@ public class DeviceActivity extends Activity {
     }
 
     //implementation of the "set" button
-    public void setValue (View v){
+    public void onClickSetButton (View v){
 
         double newValue = -1;
 
