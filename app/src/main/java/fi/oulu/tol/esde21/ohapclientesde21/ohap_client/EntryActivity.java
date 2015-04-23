@@ -38,7 +38,7 @@ public class EntryActivity extends Activity {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         try {
-            URL url = new URL(sharedPref.getString(pref_key_URL, "http://www.google.com"));
+            URL url = new URL(sharedPref.getString("pref_key_URL", "http://www.google.com"));
             centralUnit = new ConcreteCentralUnit(url) {
             };
         }
