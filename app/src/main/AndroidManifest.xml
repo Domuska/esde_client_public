@@ -9,26 +9,22 @@
         android:theme="@style/myTheme" >
         <activity
             android:name=".ohap_client.DeviceActivity"
-            android:parentActivityName=".ohap_client.ItemListActivity">
-
+            android:parentActivityName=".ohap_client.ItemListActivity" >
 
             <!-- Backwards compitability -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ohap_client.EntryActivity"/>
-
+                android:value=".ohap_client.EntryActivity" />
         </activity>
         <activity
             android:name=".ohap_client.ItemListActivity"
             android:label="@string/title_activity_item_list"
-            android:parentActivityName=".ohap_client.EntryActivity"
-            >
+            android:parentActivityName=".ohap_client.EntryActivity" >
 
             <!-- Backwards compitability -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ohap_client.EntryActivity"/>
-
+                android:value=".ohap_client.EntryActivity" />
         </activity>
         <activity
             android:name=".ohap_client.EntryActivity"
@@ -38,7 +34,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
+        </activity>
+        <activity
+            android:name=".ohap_client.SettingsActivity"
+            android:label="@string/title_activity_settings" >
         </activity>
     </application>
 

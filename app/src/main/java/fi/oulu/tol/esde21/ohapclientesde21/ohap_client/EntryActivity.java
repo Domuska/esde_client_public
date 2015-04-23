@@ -1,7 +1,10 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -11,6 +14,7 @@ import android.view.View;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.prefs.Preferences;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.CentralUnit;
@@ -29,10 +33,12 @@ public class EntryActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entry);
 
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
 
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         try {
-            URL url = new URL("http://ohap.opimobi.com:8080/");
+            URL url = new URL(sharedPref.getString(pref_key_URL, "http://www.google.com"));
             centralUnit = new ConcreteCentralUnit(url) {
             };
         }
@@ -64,6 +70,8 @@ public class EntryActivity extends Activity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(EntryActivity.this, SettingsActivity.class);
+            startActivity(intent);
             return true;
         }
 
