@@ -33,7 +33,8 @@ public class EntryActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entry);
 
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = PreferenceManager
+                .getDefaultSharedPreferences(this);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 

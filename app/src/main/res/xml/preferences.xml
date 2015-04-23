@@ -4,6 +4,7 @@
         <EditTextPreference
             android:key="pref_key_URL"
             android:title="URL"
+            android:summary=""
             android:defaultValue="@string/pref_URL_default" />
     </PreferenceCategory>
 </PreferenceScreen>
