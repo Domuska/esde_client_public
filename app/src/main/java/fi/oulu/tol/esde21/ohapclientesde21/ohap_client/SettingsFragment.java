@@ -65,7 +65,7 @@ public class SettingsFragment extends PreferenceFragment
                 if (editTextPreference.getText().trim().length() > 0){
                     editTextPreference.setSummary(editTextPreference.getText());
                 }else{
-                    editTextPreference.setSummary("hurr-dURL");
+                    editTextPreference.setSummary("http://ohap.opimobi.com:8080/");
                 }
             }
         }
