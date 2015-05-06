@@ -1,11 +1,9 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,19 +11,17 @@ import android.view.View;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.prefs.Preferences;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
-import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.CentralUnit;
+import fi.oulu.tol.esde21.ohapclientesde21.ohap.CentralUnitConnection;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
 
 public class EntryActivity extends Activity {
 
-    static ConcreteCentralUnit centralUnit;
-    private final static String EXTRA_CONTAINER_ID = "containerId";
+    static CentralUnitConnection centralUnit;
+
     private final static String EXTRA_PREFIX_STRING = "prefixData";
 
     @Override
@@ -40,17 +36,13 @@ public class EntryActivity extends Activity {
 
         try {
             URL url = new URL(sharedPref.getString("pref_key_URL", "http://www.google.com"));
-            centralUnit = new ConcreteCentralUnit(url) {
+            centralUnit = new CentralUnitConnection(url) {
             };
         }
         catch (MalformedURLException e){
             //do stuff with the exception...
         }
 
-        centralUnit.setName("OHAP Test server");
-
-        //populate CU with dummy data
-        populateCU();
 
     }
 
@@ -85,8 +77,9 @@ public class EntryActivity extends Activity {
     public void openList(View v){
 
         Intent i = new Intent(this, ItemListActivity.class);
-        i.putExtra(EXTRA_CONTAINER_ID, Long.toString(centralUnit.getId()));
+        i.putExtra(ItemListActivity.EXTRA_CONTAINER_ID, Long.toString(centralUnit.getId()));
         i.putExtra(EXTRA_PREFIX_STRING, centralUnit.getName());
+        i.putExtra(ItemListActivity.EXTRA_CENTRAL_UNIT_ID, centralUnit.getId());
         startActivity(i);
     }
 
@@ -112,53 +105,6 @@ public class EntryActivity extends Activity {
 
 
 
-    private void populateCU(){
 
-
-        Device device = new Device(centralUnit, 1, Device.Type.ACTUATOR, Device.ValueType.DECIMAL );
-        device.setDecimalValue(70);
-        device.setMinMaxValues(0, 100);
-
-        device.setName("A bloody ceiling lamp");
-        device.setDescription("A lamp. In ceiling. It is not actually bloody.");
-
-        Device device2 = new Device (centralUnit, 2, Device.Type.ACTUATOR, Device.ValueType.BINARY);
-        device2.setName("Another sodding lamp");
-        device2.setDescription("Old lamp. On or off.");
-        device2.changeBinaryValue(true);
-
-
-        Device device3 = new Device (centralUnit, 3, Device.Type.SENSOR, Device.ValueType.BINARY);
-        device3.setName("Fancy hi-tech lamp's sensor");
-        device3.setDescription("Sensor sensing the fancy lamp.");
-        device3.setBinaryValue(true);
-
-        Container container1 = new Container(centralUnit, 4);
-        container1.setName("Seppo's working room");
-        container1.setDescription("The wonderful room of Seppo, 5/5. No one will see this text!");
-
-        Container container2 = new Container(centralUnit, 6);
-        container2.setName("Hermandos' Working Closet");
-
-        Device device4 = new Device(container1, 5, Device.Type.ACTUATOR, Device.ValueType.BINARY);
-        device4.setName("Surprise device!");
-
-
-
-        Container container3 = new Container(container1, 7);
-        container3.setName("Seppo's room's broom closet");
-
-        // let's create a couple more to for testing memory usage and responsiveness...
-        for(int i = 8; i < 155; i++){
-
-            Device deviceFor = new Device(container1, i, Device.Type.SENSOR, Device.ValueType.DECIMAL);
-            deviceFor.setName("Markku Markkula proximity sensor");
-            deviceFor.setDescription("Sensor for calculating the propability of Markku Markkula approaching");
-            deviceFor.setMinMaxValues(0, 100);
-
-            deviceFor.setDecimalValue(5);
-        }
-
-    }
 
 }

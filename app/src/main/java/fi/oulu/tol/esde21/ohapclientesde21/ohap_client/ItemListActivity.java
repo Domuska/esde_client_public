@@ -33,9 +33,13 @@ public class ItemListActivity extends Activity {
 
 
     private static final String TAG = "ItemListActivity";
-    private final static String EXTRA_CONTAINER_ID = "containerId";
-    private final static String EXTRA_PREFIX_STRING = "prefixData";
-    static final String DEVICE_ID = "deviceId";
+
+    public final static String EXTRA_CONTAINER_ID = "fi.oulu.tol.esde.esde21.CONTAINER_ID";
+    public final static String EXTRA_PREFIX_STRING = "prefixData";
+    public final static String EXTRA_CENTRAL_UNIT_ID = "fi.oulu.tol.esde.esde21.CENTRAL_UNIT_URL";
+
+    //public static final String DEVICE_ID = "deviceId";
+
 
     ListView listView;
 
@@ -54,9 +58,13 @@ public class ItemListActivity extends Activity {
         // get the current path of the item
         extraPrefix = getIntent().getStringExtra(EXTRA_PREFIX_STRING) + "/";
         Log.d(TAG, "Extra string: " + extraPrefix);
+        //TODO: handle missing container ID
 
         extraContainerId = getIntent().getStringExtra(EXTRA_CONTAINER_ID);
         Log.d(TAG, "Gotten container ID Extra: " + extraContainerId);
+
+        //TODO: https://wiki.oulu.fi/display/esde/2+Doings || jatka: Now that you have the URL
+        // && extra prefix ei en‰‰ ole tarpeellinen, hiukka ylemp‰n‰ wikiss‰ siit‰...
 
         listView = (ListView) findViewById(R.id.deviceListView);
         listView.setAdapter(new OhapListAdapter(extraPrefix, extraContainerId));
@@ -84,7 +92,7 @@ public class ItemListActivity extends Activity {
                     Intent deviceIntent = new Intent(ItemListActivity.this, DeviceActivity.class);
 
                     //give the ID of the device and its' path as extra to the activity
-                    deviceIntent.putExtra(DEVICE_ID, id);
+                    deviceIntent.putExtra(DeviceActivity.EXTRA_DEVICE_ID, id);
                     deviceIntent.putExtra(EXTRA_PREFIX_STRING, extraPrefix);
                     startActivity(deviceIntent);
                 }
