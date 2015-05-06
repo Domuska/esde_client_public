@@ -25,5 +25,6 @@ proguard/
 # Log Files
 *.log
 
-# .Idea folder ignored, added by Tomi
+# .Idea folder, added by Tomi
 .idea/
+esde21.iml
