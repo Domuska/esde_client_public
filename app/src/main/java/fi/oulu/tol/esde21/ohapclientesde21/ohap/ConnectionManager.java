@@ -4,6 +4,8 @@ package fi.oulu.tol.esde21.ohapclientesde21.ohap;
  * Created by Domu on 06-May-15.
  */
 
+import android.util.Log;
+
 import java.net.URL;
 import java.util.HashMap;
 
@@ -16,6 +18,7 @@ public class ConnectionManager {
 
     private static ConnectionManager connectionManager;
     private HashMap<URL, CentralUnitConnection> connections = new HashMap<>();
+    private String TAG = "ConnectionManager";
 
     private ConnectionManager(){
     }
@@ -34,10 +37,11 @@ public class ConnectionManager {
 
     public CentralUnitConnection getCentralUnit(URL url){
 
+        Log.d(TAG, "getCentralUnit called with url: " + url.toString());
         if (connections.get(url) == null){
             connections.put(url, new CentralUnitConnection(url));
         }
-
+        Log.d(TAG, "central unit connection's name: " + connections.get(url).getName());
         return connections.get(url);
     }
 }

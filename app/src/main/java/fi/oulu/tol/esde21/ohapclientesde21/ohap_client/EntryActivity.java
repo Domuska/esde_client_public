@@ -74,12 +74,13 @@ public class EntryActivity extends Activity {
 
     // this method is the onClick method for the button in the middle of the screen
     // it starts the first list activity and passes the ID of the CU to it
-    public void openList(View v){
+    public void onEnterButtonClicked(View v){
 
         Intent i = new Intent(this, ItemListActivity.class);
-        i.putExtra(ItemListActivity.EXTRA_CONTAINER_ID, Long.toString(centralUnit.getId()));
+        i.putExtra(ItemListActivity.EXTRA_CONTAINER_ID, centralUnit.getId());
         i.putExtra(EXTRA_PREFIX_STRING, centralUnit.getName());
-        i.putExtra(ItemListActivity.EXTRA_CENTRAL_UNIT_ID, centralUnit.getId());
+        i.putExtra(ItemListActivity.EXTRA_CENTRAL_UNIT_URL, centralUnit.getURL().toString());
+
         startActivity(i);
     }
 

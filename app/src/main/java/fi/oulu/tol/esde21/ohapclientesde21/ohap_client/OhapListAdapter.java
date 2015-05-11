@@ -29,15 +29,17 @@ public class OhapListAdapter implements android.widget.ListAdapter {
     private String prefix;
     private String containerId;
     //this is t he real prefix used in the program now.
-    String itemPrefix;
+
 
 
     Container container;
 
 
-    public OhapListAdapter(String prefix, String containerId){
+    public OhapListAdapter(Container c){
         this.prefix = prefix;
         this.containerId = containerId;
+        container = c;
+        Log.d(TAG, "initialized variable container with parameter c");
 
     }
 
@@ -65,14 +67,13 @@ public class OhapListAdapter implements android.widget.ListAdapter {
 
     @Override
     public int getCount() {
-        container = (Container)EntryActivity.getCentralUnitItem(Long.parseLong(containerId));
         return container.getItemCount();
     }
 
-    //TODO: does this even work correctly?
+
     @Override
     public Object getItem(int position) {
-        return EntryActivity.getCentralUnitItem(position);
+        return container.getItemByIndex(position);
     }
 
 
@@ -108,32 +109,33 @@ public class OhapListAdapter implements android.widget.ListAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        //old way of building the item's path
-        //viewHolder.rowTextView.setText(prefix + container.getItemByIndex(position).getName());
 
+        // create the prefix before item's name
+        String itemRowText = "";
 
-        // build the prefix for the item's "path"
-        //Container parentVariable = EntryActivity.getCentralUnitItem(getItemId(position)).getParent();
-        Container parentVariable = container.getParent();
-        itemPrefix = "";
+        Container parentVariable = container;
 
         if(parentVariable != null) {
 
-            Log.d(TAG, "Starting do-while loop");
+            Log.d(TAG, "Starting do-while loop to create item path");
             Log.d(TAG, "Parent name: " + parentVariable.getName());
             do {
 
-                itemPrefix = parentVariable.getName() + "/" + itemPrefix;
+                itemRowText = parentVariable.getName() + "/" + itemRowText;
                 parentVariable = parentVariable.getParent();
 
             } while (parentVariable != null);
 
         }
         else{
-            itemPrefix = container.getName() + "/";
+            itemRowText = container.getName() + "/";
         }
 
-        viewHolder.rowTextView.setText(itemPrefix + container.getItemByIndex(position).getName());
+
+        //add the item's name after the prefix
+        itemRowText += container.getItemByIndex(position).getName();
+        viewHolder.rowTextView.setText(itemRowText);
+
         return convertView;
     }
 

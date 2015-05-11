@@ -23,7 +23,7 @@
     <!--entry_activity strings -->
     <string name="entryActivity_infoText">Hello! Welcome to OHAP smart-home remote device app thingy!</string>
     <string name="title_activity_entry">EntryActivity</string>
-    <string name="entryActivity_buttonText">ENTER!</string>
+    <string name="entryActivity_buttonText">ENTER</string>
 
     <!--preference strings -->
     <string name="pref_URL_default">http://ohap.opimobi.com:8080/</string>

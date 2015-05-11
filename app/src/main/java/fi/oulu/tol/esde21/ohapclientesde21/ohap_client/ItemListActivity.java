@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
+import fi.oulu.tol.esde21.ohapclientesde21.ohap.ConnectionManager;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.CentralUnit;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
@@ -35,11 +36,8 @@ public class ItemListActivity extends Activity {
     private static final String TAG = "ItemListActivity";
 
     public final static String EXTRA_CONTAINER_ID = "fi.oulu.tol.esde.esde21.CONTAINER_ID";
-    public final static String EXTRA_PREFIX_STRING = "prefixData";
-    public final static String EXTRA_CENTRAL_UNIT_ID = "fi.oulu.tol.esde.esde21.CENTRAL_UNIT_URL";
-
-    //public static final String DEVICE_ID = "deviceId";
-
+    public final static String EXTRA_PREFIX_STRING = "prefixData"; // TÄMÄ TULEE OLEMAAN TURHA, POISTETAAN
+    public final static String EXTRA_CENTRAL_UNIT_URL = "fi.oulu.tol.esde.esde21.CENTRAL_UNIT_URL";
 
     ListView listView;
 
@@ -47,7 +45,13 @@ public class ItemListActivity extends Activity {
     String extraPrefix;
 
     //the id for the container of this hierarchy
-    String extraContainerId;
+    Long extraContainerId;
+
+    //url for the central unit
+    String extraURL;
+
+    Container thisContainer;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,17 +61,45 @@ public class ItemListActivity extends Activity {
 
         // get the current path of the item
         extraPrefix = getIntent().getStringExtra(EXTRA_PREFIX_STRING) + "/";
-        Log.d(TAG, "Extra string: " + extraPrefix);
+        Log.d(TAG, "Gotten extra prefix string: " + extraPrefix);
         //TODO: handle missing container ID
 
-        extraContainerId = getIntent().getStringExtra(EXTRA_CONTAINER_ID);
+        extraContainerId = getIntent().getLongExtra(EXTRA_CONTAINER_ID, -1);
         Log.d(TAG, "Gotten container ID Extra: " + extraContainerId);
 
         //TODO: https://wiki.oulu.fi/display/esde/2+Doings || jatka: Now that you have the URL
         // && extra prefix ei enää ole tarpeellinen, hiukka ylempänä wikissä siitä...
 
+        extraURL = getIntent().getStringExtra(EXTRA_CENTRAL_UNIT_URL);
+        Log.d(TAG, "Gotten central unit URL: " + extraURL);
+
+
+        // try to use the extra url string to get the central unit in question from ConnectionManger
+        try{
+            URL centralUnitURL = new URL(extraURL);
+
+            // if the ID we get is for the central unit under where we are, the container central unit itself
+            if(ConnectionManager.getInstance().getCentralUnit(centralUnitURL).getId() == extraContainerId) {
+                thisContainer = ConnectionManager.getInstance().getCentralUnit(centralUnitURL);
+            }
+            //otherwise get the central unit by querying the central unit with the item id
+            else{
+                thisContainer =
+                        (Container) ConnectionManager.getInstance()
+                                .getCentralUnit(centralUnitURL).getItemById(extraContainerId);
+            }
+            Log.d(TAG, "URL: " + extraURL + " used to initialize container");
+            Log.d(TAG, "Container name: " + thisContainer.getName());
+        }
+        catch (MalformedURLException e){
+            Log.d(TAG, "URL extra from previous activity wasn't a proper url");
+        }
+
         listView = (ListView) findViewById(R.id.deviceListView);
-        listView.setAdapter(new OhapListAdapter(extraPrefix, extraContainerId));
+        listView.setAdapter(new OhapListAdapter(thisContainer));
+
+
+        //thisContainer = ConnectionManager.getInstance().getCentralUnit(centralUnitURL).getItemById(extraContainerId);
 
         // listener for list's items
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -78,14 +110,15 @@ public class ItemListActivity extends Activity {
                 Log.d(TAG, "Position: " + Integer.toString(position) + " Id: " + Long.toString(id));
 
                 //if the selected element is container, open a new list, else open the device page
-                if (EntryActivity.getCentralUnitItem(id) instanceof Container) {
+                if (thisContainer.getItemByIndex(position) instanceof Container) {
 
                     // set the file path to contain the container's name
                     extraPrefix += EntryActivity.getCentralUnitItem(id).getName();
 
                     Intent containerIntent = new Intent(ItemListActivity.this, ItemListActivity.class);
-                    containerIntent.putExtra(EXTRA_PREFIX_STRING, extraPrefix);
-                    containerIntent.putExtra(EXTRA_CONTAINER_ID, Long.toString(id));
+                    //containerIntent.putExtra(EXTRA_PREFIX_STRING, extraPrefix);
+                    containerIntent.putExtra(EXTRA_CONTAINER_ID, id);
+                    containerIntent.putExtra(EXTRA_CENTRAL_UNIT_URL, extraURL);
                     startActivity(containerIntent);
 
                 } else {
@@ -93,7 +126,8 @@ public class ItemListActivity extends Activity {
 
                     //give the ID of the device and its' path as extra to the activity
                     deviceIntent.putExtra(DeviceActivity.EXTRA_DEVICE_ID, id);
-                    deviceIntent.putExtra(EXTRA_PREFIX_STRING, extraPrefix);
+                    deviceIntent.putExtra(DeviceActivity.EXTRA_CENTRAL_UNIT_URL, extraURL);
+                    //deviceIntent.putExtra(EXTRA_PREFIX_STRING, extraPrefix);
                     startActivity(deviceIntent);
                 }
             }

@@ -37,7 +37,13 @@
         </activity>
         <activity
             android:name=".ohap_client.SettingsActivity"
-            android:label="@string/title_activity_settings" >
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".ohap_client.EntryActivity">
+
+            <!-- Backwards compitability -->
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ohap_client.EntryActivity" />
         </activity>
     </application>
 
