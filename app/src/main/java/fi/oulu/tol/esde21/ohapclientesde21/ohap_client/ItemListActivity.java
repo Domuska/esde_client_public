@@ -36,13 +36,9 @@ public class ItemListActivity extends Activity {
     private static final String TAG = "ItemListActivity";
 
     public final static String EXTRA_CONTAINER_ID = "fi.oulu.tol.esde.esde21.CONTAINER_ID";
-    public final static String EXTRA_PREFIX_STRING = "prefixData"; // TÄMÄ TULEE OLEMAAN TURHA, POISTETAAN
     public final static String EXTRA_CENTRAL_UNIT_URL = "fi.oulu.tol.esde.esde21.CENTRAL_UNIT_URL";
 
     ListView listView;
-
-    // string holding the "path" of the item
-    String extraPrefix;
 
     //the id for the container of this hierarchy
     Long extraContainerId;
@@ -58,21 +54,13 @@ public class ItemListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
 
-
-        // get the current path of the item
-        extraPrefix = getIntent().getStringExtra(EXTRA_PREFIX_STRING) + "/";
-        Log.d(TAG, "Gotten extra prefix string: " + extraPrefix);
         //TODO: handle missing container ID
 
         extraContainerId = getIntent().getLongExtra(EXTRA_CONTAINER_ID, -1);
         Log.d(TAG, "Gotten container ID Extra: " + extraContainerId);
 
-        //TODO: https://wiki.oulu.fi/display/esde/2+Doings || jatka: Now that you have the URL
-        // && extra prefix ei enää ole tarpeellinen, hiukka ylempänä wikissä siitä...
-
         extraURL = getIntent().getStringExtra(EXTRA_CENTRAL_UNIT_URL);
         Log.d(TAG, "Gotten central unit URL: " + extraURL);
-
 
         // try to use the extra url string to get the central unit in question from ConnectionManger
         try{
@@ -99,8 +87,6 @@ public class ItemListActivity extends Activity {
         listView.setAdapter(new OhapListAdapter(thisContainer));
 
 
-        //thisContainer = ConnectionManager.getInstance().getCentralUnit(centralUnitURL).getItemById(extraContainerId);
-
         // listener for list's items
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -112,11 +98,7 @@ public class ItemListActivity extends Activity {
                 //if the selected element is container, open a new list, else open the device page
                 if (thisContainer.getItemByIndex(position) instanceof Container) {
 
-                    // set the file path to contain the container's name
-                    extraPrefix += EntryActivity.getCentralUnitItem(id).getName();
-
                     Intent containerIntent = new Intent(ItemListActivity.this, ItemListActivity.class);
-                    //containerIntent.putExtra(EXTRA_PREFIX_STRING, extraPrefix);
                     containerIntent.putExtra(EXTRA_CONTAINER_ID, id);
                     containerIntent.putExtra(EXTRA_CENTRAL_UNIT_URL, extraURL);
                     startActivity(containerIntent);
@@ -124,10 +106,9 @@ public class ItemListActivity extends Activity {
                 } else {
                     Intent deviceIntent = new Intent(ItemListActivity.this, DeviceActivity.class);
 
-                    //give the ID of the device and its' path as extra to the activity
+                    //give the ID of the device and central unit's URL as extras
                     deviceIntent.putExtra(DeviceActivity.EXTRA_DEVICE_ID, id);
                     deviceIntent.putExtra(DeviceActivity.EXTRA_CENTRAL_UNIT_URL, extraURL);
-                    //deviceIntent.putExtra(EXTRA_PREFIX_STRING, extraPrefix);
                     startActivity(deviceIntent);
                 }
             }
@@ -142,6 +123,7 @@ public class ItemListActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
+        //TODO: read below
         //commented out because we don't actually want a menu in the item list, should propably delete the xml as well if menus will not be added here
         //getMenuInflater().inflate(R.menu.menu_item_list, menu);
         return true;
