@@ -362,45 +362,8 @@ public class CentralUnitConnection extends CentralUnit{
 
                 case 0x04: // decimal sensor
                     Log.d(TAG, "message received: new decimal sensor");
-
-                    //itemIdentifier = storedMessage.integer32();
-                    //decimalValue = storedMessage.decimal64();
-
-                    // get parent ID, name, description, internal and X, Y, Z coords
                     handleDecimalDevice(4);
-
-                    /*itemParentIdentifier = storedMessage.integer32();
-                    itemName = storedMessage.text();
-                    itemDescription = storedMessage.text();
-                    itemInternal = storedMessage.binary8();
-                    itemCoordinateX = storedMessage.decimal64();
-                    itemCoordinateY = storedMessage.decimal64();
-                    itemCoordinateZ = storedMessage.decimal64();*/
-
-                    /*decimalMin = storedMessage.decimal64();
-                    decimalMax = storedMessage.decimal64();
-                    decimalUnit = storedMessage.text();
-                    decimalAbbreviation = storedMessage.text();*/
-
-
-                    /*Log.d(TAG, "creating a new decimal sensor");
-                    newDevice = new Device((Container)ConnectionManager.getInstance()
-                            .getCentralUnit(thisConnection.getURL())
-                            .getItemById(itemParentIdentifier)
-                            ,itemIdentifier, Device.Type.SENSOR, Device.ValueType.DECIMAL);*/
-
-                    /*newDevice.setDecimalValue(decimalValue);
-
-                    newDevice.setName(itemName);
-                    newDevice.setDescription(itemDescription);
-                    newDevice.setInternal(itemInternal);
-                    newDevice.setLocation((int)itemCoordinateX, (int)itemCoordinateY, (int)itemCoordinateZ);
-
-                    newDevice.setMinMaxValues(decimalMin, decimalMax);
-                    newDevice.setUnit(decimalUnit, decimalAbbreviation);*/
-
-
-
+                    break;
 
                 case 0x05: //decimal actuator
                     Log.d(TAG, "message received: new decimal actuator");
@@ -431,11 +394,6 @@ public class CentralUnitConnection extends CentralUnit{
                         thisConnection.setLocation((int) itemCoordinateX, (int) itemCoordinateY, (int) itemCoordinateZ);
                         Log.d(TAG, "central unit's name: " + thisConnection.getName());
 
-                        /*OutgoingMessage outgoingMessage = new OutgoingMessage();
-                        outgoingMessage.integer8(0x0c)
-                                    .integer32(thisConnection.getId())
-                                    .writeTo(outputStream);*/
-                        //new HandlerThread().run();
                     }
                     else{
                         Log.d(TAG, "initializing container");
@@ -494,7 +452,7 @@ public class CentralUnitConnection extends CentralUnit{
                             .getItemById(itemIdentifier)
                             .destroy();
                     break;
-                //TODO: default case here?
+
 
                 default:
                     Log.d(TAG, "message received: unknown");
