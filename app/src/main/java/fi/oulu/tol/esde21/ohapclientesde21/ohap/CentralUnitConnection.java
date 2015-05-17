@@ -210,7 +210,7 @@ public class CentralUnitConnection extends CentralUnit{
 
     private class HandlerThread extends Thread{
 
-
+        Handler handler = new Handler(Looper.getMainLooper());
 
         @Override
         public void run() {
@@ -218,13 +218,14 @@ public class CentralUnitConnection extends CentralUnit{
             //TODO: not sure if this variable is actually necessary, test to see if stuff breaks when it's removed
             boolean loopVariable = true;
 
-            Handler handler = new Handler(Looper.getMainLooper());
+
+
             //IncomingMessage incomingMessage = new IncomingMessage();
             Log.d(TAG, "going into the handlerThread loop...");
 
 
             while (loopVariable) {
-                IncomingMessage incomingMessage = new IncomingMessage();
+                final IncomingMessage incomingMessage = new IncomingMessage();
                 // dont try to read from the stream unless there's no problems
                 // (IncomingMessage will return false if there's an exception while reading)
                 if (incomingMessage.readFrom(inputStream) == true) {
@@ -247,11 +248,12 @@ public class CentralUnitConnection extends CentralUnit{
                     }
                 }
 
-                //new HandlerThread().run();
-                //loopVariable = false;
+                Log.d(TAG, "Starting a new HandlerThread...");
+                new HandlerThread().run();
+                loopVariable = false;
             }
-            Log.d(TAG, "Starting a new HandlerThread...");
-            new HandlerThread().run();
+            //Log.d(TAG, "Starting a new HandlerThread...");
+            //new HandlerThread().run();
         } // run ends
     } //handlerThread ends
 
@@ -299,6 +301,8 @@ public class CentralUnitConnection extends CentralUnit{
 
                 case 0x01: // logout
                     Log.d(TAG, "message received: logout");
+                    String errorText = storedMessage.text();
+                    Log.d(TAG, "logout error message: " + errorText);
                     //TODO: how to inform user that he's been logged out?
                     break;
 
@@ -388,10 +392,10 @@ public class CentralUnitConnection extends CentralUnit{
                         thisConnection.setLocation((int) itemCoordinateX, (int) itemCoordinateY, (int) itemCoordinateZ);
                         Log.d(TAG, "central unit's name: " + thisConnection.getName());
 
-                        OutgoingMessage outgoingMessage = new OutgoingMessage();
+                        /*OutgoingMessage outgoingMessage = new OutgoingMessage();
                         outgoingMessage.integer8(0x0c)
                                     .integer32(thisConnection.getId())
-                                    .writeTo(outputStream);
+                                    .writeTo(outputStream);*/
                         //new HandlerThread().run();
                     }
                     else{

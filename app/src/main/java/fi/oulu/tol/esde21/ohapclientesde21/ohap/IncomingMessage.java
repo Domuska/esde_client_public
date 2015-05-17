@@ -54,6 +54,8 @@ public class IncomingMessage {
             int readLength = (firstByte << 8) + secondByte;
             Log.d(TAG, "Length of the incoming message: " + readLength);
             buffer = readExactly(is, readLength);
+
+
             return true;
 
         }
