@@ -60,24 +60,63 @@ public class CentralUnitConnection extends CentralUnit{
         }
     }
 
-    @Override
+    /*@Override
     protected void changeBinaryValue(Device device, boolean value) {
 
-        Log.d(TAG, "sending value change request to server, device(binary) id: " + device.getId());
+        Log.d(TAG, "starting to send value change request (binary) to server, device(binary) id: " + device.getId()
+                    + "value: " + value);
 
+        if(outputStream != null)
+            Log.d(TAG, "changeBinaryValue: outputstream is not null");
+        else
+            Log.d(TAG, "WARNING: changeBinaryValue: outputstream is NULL!");
+
+        Log.d(TAG, "changeBinaryValue: " + 0x0a + " " + device.getId() + " " + value);
         OutgoingMessage outgoingMessage = new OutgoingMessage();
         outgoingMessage.integer8(0x0a)
                 .integer32(device.getId())
                 .binary8(value)
                 .writeTo(outputStream);
 
+        new HandlerThread().start();
+
+    }*/
+
+    @Override
+    protected void changeBinaryValue(Device device, boolean value) {
+
+        long devicesId = device.getId();
+
+        //TODO: alla olevan viestin l‰hetysyritys heitt‰‰ virheen jos devicen ID on 2, se saa olla mik‰ tahansa muu. Wat?
+
+        OutgoingMessage outgoingPingMessage = new OutgoingMessage();
+        outgoingPingMessage.integer8(0x0a)
+                .integer32(device.getId())
+                .binary8(value)
+                .writeTo(outputStream);
+
+        /*OutgoingMessage outgoingPingMessage = new OutgoingMessage();
+        outgoingPingMessage.integer8(2)
+                .integer32(5)
+                .writeTo(outputStream);*/
+
     }
 
     @Override
     protected void changeDecimalValue(Device device, double value) {
 
-        Log.d(TAG, "sending value change request to server, device(decimal) id: " + device.getId());
+        Log.d(TAG, "sending value change request (decimal) to server, device(decimal) id: " + device.getId()
+                + " value " + value);
         //code for decimal value change 0x09
+
+
+        /*OutgoingMessage outgoingPingMessage = new OutgoingMessage();
+        outgoingPingMessage.integer8(0x0a)
+                .integer32(device.getId())
+                .binary8(true)
+                .writeTo(outputStream);*/
+
+
         OutgoingMessage outgoingMessage = new OutgoingMessage();
         outgoingMessage.integer8(0x09)
                 .integer32(device.getId())
@@ -487,7 +526,7 @@ public class CentralUnitConnection extends CentralUnit{
             Device newDevice;
 
             if(deviceType == 4){
-                Log.d(TAG, "creating a new decimal sensor");
+                Log.d(TAG, "creating a new decimal sensor " + itemName + " ID: " + itemIdentifier);
                 newDevice = new Device((Container)ConnectionManager.getInstance()
                         .getCentralUnit(thisConnection.getURL())
                         .getItemById(itemParentIdentifier)
@@ -495,7 +534,7 @@ public class CentralUnitConnection extends CentralUnit{
 
             }
             else {
-                Log.d(TAG, "creating a new decimal actuator");
+                Log.d(TAG, "creating a new decimal actuator " + itemName + " ID: " + itemIdentifier);
                 newDevice = new Device((Container)ConnectionManager.getInstance()
                         .getCentralUnit(thisConnection.getURL())
                         .getItemById(itemParentIdentifier)
@@ -531,14 +570,14 @@ public class CentralUnitConnection extends CentralUnit{
             Device newDevice;
 
             if(deviceType == 6){
-                Log.d(TAG, "creating a new binary sensor");
+                Log.d(TAG, "creating a new binary sensor " + itemName + " ID: " + itemIdentifier);
                 newDevice = new Device((Container)ConnectionManager.getInstance()
                         .getCentralUnit(thisConnection.getURL())
                         .getItemById(itemParentIdentifier)
                         , itemIdentifier, Device.Type.SENSOR, Device.ValueType.BINARY);
             }
             else {
-                Log.d(TAG, "creating a new binary actuator");
+                Log.d(TAG, "creating a new binary actuator with name " + itemName + " ID: " + itemIdentifier);
                 newDevice = new Device((Container)ConnectionManager.getInstance()
                         .getCentralUnit(thisConnection.getURL())
                         .getItemById(itemParentIdentifier)

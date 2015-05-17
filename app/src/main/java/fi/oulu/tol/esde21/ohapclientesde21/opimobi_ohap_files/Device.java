@@ -1,5 +1,7 @@
 package fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files;
 
+import android.util.Log;
+
 /**
  * A real device in an OHAP application. Inherits all common properties from the
  * {@link com.opimobi.ohap.Item} base class.
@@ -34,6 +36,8 @@ public class Device extends Item {
          */
         SENSOR
     }
+
+    private final String TAG = "Device";
 
     /**
      * The possible types of the value of a device.
@@ -134,8 +138,10 @@ public class Device extends Item {
         if (valueType != ValueType.BINARY)
             throw new IllegalStateException("Value type is not binary.");
 
-        if (this.binaryValue == value)
+        if (this.binaryValue == value) {
+            Log.d(TAG, "new value was same as current value, doing nothing...");
             return;
+        }
 
         getCentralUnit().changeBinaryValue(this, value);
     }

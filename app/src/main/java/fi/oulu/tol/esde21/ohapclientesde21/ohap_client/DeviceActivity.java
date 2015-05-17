@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -50,6 +51,7 @@ public class DeviceActivity extends Activity {
     Switch aSwitch;
     Button setButton;
 
+    Activity thisActivity;
 
     // let's use a hard coded value for now, perhaps later on put
     // the value into sharedPreferences?
@@ -83,7 +85,7 @@ public class DeviceActivity extends Activity {
         }
 
         centralUnit = ConnectionManager.getInstance().getCentralUnit(centralUnitUrl);
-
+        thisActivity = this;
 
 
         if(deviceId != 0) {
@@ -116,6 +118,9 @@ public class DeviceActivity extends Activity {
                 deviceMaxValue.setVisibility(View.GONE);
                 currentValue.setVisibility(View.GONE);
                 setButton.setVisibility(View.GONE);
+
+                //set switch status based on device's status
+                aSwitch.setChecked(aDevice.getBinaryValue());
 
             }
             //if device isn't binary it is decimal so hide binary device UI elements and set values
@@ -173,8 +178,7 @@ public class DeviceActivity extends Activity {
             setTitle(aDevice.getName());
 
 
-            // set the up the "up" navigation enabled
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+
 
 
             Container parentVariable = aDevice.getParent();
@@ -311,20 +315,30 @@ public class DeviceActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    //implementation of the "set" button
+    // change teh value of the actuator (device takes care of sending request to the server)
     public void onClickSetButton (View v){
 
         double newValue = -1;
 
         //check if the field is empty
-        if(!TextUtils.isEmpty(currentValue.getText().toString()))
+        if(!TextUtils.isEmpty(currentValue.getText().toString())) {
             newValue = Double.parseDouble(currentValue.getText().toString());
+            aDevice.changeDecimalValue(newValue);
+        }
 
         //if not, check if the value is valid and act accordingly
-        if (newValue >= 0 && newValue <= 100)
+        if (newValue >= aDevice.getMinValue() && newValue <= aDevice.getMaxValue())
             seekbar.setProgress((int)newValue);
 
-
     }
+
+    // change device's (which will send an request for server) state
+    // NOTE: if device's ID is 2, the program will crash. No clue why!
+    public void onBinaryButtonClicked (View v){
+        Log.d(TAG, "binary button clicked: " + aSwitch.isChecked());
+        boolean status = aSwitch.isChecked();
+        aDevice.changeBinaryValue(status);
+    }
+
 
 }

@@ -1,5 +1,7 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap;
 
+import android.util.Log;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -27,6 +29,7 @@ public class OutgoingMessage {
      * Character set used to convert strings.
      */
     private final Charset charset = Charset.forName("UTF-8");
+    private final String TAG = "OutgoingMessage";
 
     /**
      * Ensures that the internal buffer have room for the specified amount of
@@ -48,6 +51,8 @@ public class OutgoingMessage {
 
        // http://stackoverflow.com/questions/1936857/convert-integer-into-byte-array-java
 
+        Log.d(TAG, "starting writeTo, position: " + position);
+
         int length = position -2;
         buffer[0] = (byte) (length >> 8);
         buffer[1] = (byte) length;
@@ -58,20 +63,30 @@ public class OutgoingMessage {
             os.write(buffer, 0, length + 2);
         }
         catch(IOException e){
-
+            Log.d(TAG, "caught exception in OutgoingMessage writeTo");
         }
     }
 
     public OutgoingMessage binary8(boolean b){
 
-        Integer integer;
+        Log.d(TAG, "binary8: " + b);
 
-        if (b == true)
+        Integer integer;
+        ensureCapacity(1);
+
+        /*if (b == true)
             integer = new Integer (1);
         else
-            integer = new Integer (0);
+            integer = new Integer (0);*/
+        byte by;
+        if (b)
+            by = 1;
+        else
+            by = 0;
 
-        buffer[position] = integer.byteValue();
+        Log.d(TAG, "binary8 byte: " + by);
+
+        buffer[position] = by;
 
         /*if(b) {
             buffer[position] = (byte) 1;
@@ -87,15 +102,23 @@ public class OutgoingMessage {
 
     public OutgoingMessage integer8(int i){
 
+        Log.d(TAG, "integer8: " + i);
+
+        ensureCapacity(1);
         Integer integer = new Integer(i);
 
-        buffer[position] = integer.byteValue();
+        //buffer[position] = integer.byteValue();
+        buffer[position] = (byte) i;
         position++;
 
         return this;
     }
 
     public OutgoingMessage integer16(int i){
+
+        Log.d(TAG, "integer16: " + i);
+
+        ensureCapacity(2);
 
         // ekat 8 bittiä bufferiin, bittisiirros oikealle
         // (puotetaan intin bittikuvajaisesta 8 vasemmanpuolisinta bittiä)
@@ -112,6 +135,10 @@ public class OutgoingMessage {
 
 
     public OutgoingMessage integer32(long i){
+
+        ensureCapacity(4);
+
+        Log.d(TAG, "integer32: " + i);
 
 
         //jaetaan sisääntuleva intti neljään palaan bittishiftauksella
@@ -138,6 +165,10 @@ public class OutgoingMessage {
 
     public OutgoingMessage decimal64(double d){
 
+        Log.d(TAG, "decimal64: " + d);
+
+        ensureCapacity(8);
+
         long longValue = Double.doubleToLongBits(d);
 
         // samaan tapaan kuin yllä, joka kierroksella longista otetaan 8 bittiä, siirretään
@@ -158,10 +189,14 @@ public class OutgoingMessage {
 
     public OutgoingMessage text(String message) {
 
+        Log.d(TAG, "text: " + message);
+
 
         byte[] stringBytes;
         // copy message's byte representation to stringBytes array
         stringBytes = message.getBytes(charset);
+        ensureCapacity(stringBytes.length+2);
+        Log.d(TAG, "text length: " + stringBytes.length);
 
         // put string's length into buffer as 2 bytes
         buffer[position] = (byte) (stringBytes.length >> 8);

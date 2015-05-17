@@ -328,6 +328,7 @@ public class HbdpConnection {
 			session = new URL(url + id);
 
 			new HbdpThread().start();
+
 		}
 
 		private void loop() throws InterruptedException, IOException {
