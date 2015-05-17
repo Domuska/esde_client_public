@@ -1,6 +1,7 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import android.content.Context;
+import android.database.DataSetObservable;
 import android.database.DataSetObserver;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,36 +14,52 @@ import java.util.ArrayList;
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.EventSource;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
 
 /**
  * Created by Domu on 07-Apr-15.
  *
- * Adapter for the list to tie data into the list
+ * Adapter for the list to tie data into the list, AKA ContainerListAdapter
  */
 
 
-public class OhapListAdapter implements android.widget.ListAdapter {
+public class ItemListAdapter implements android.widget.ListAdapter
+                                        ,EventSource.Listener<Container,Item>{
 
     static final String TAG = "OhapListAdapter";
     //this followin prefix string is not actually utilized anywhere, we can perhaps delete it in future but let's leave it for now
     private String prefix;
     private String containerId;
-    //this is t he real prefix used in the program now.
+    private DataSetObservable dataSetObservable = new DataSetObservable();
 
 
 
     Container container;
 
 
-    public OhapListAdapter(Container c){
+    public ItemListAdapter(Container c){
         this.prefix = prefix;
         this.containerId = containerId;
         container = c;
-        Log.d(TAG, "initialized variable container with parameter c");
+        Log.d(TAG, "initialized container in itemListAdapter constructor");
+
+        // I have no bloody clue how this works. And if this is what's supposed to be here. *shrug*
+        c.itemAddedEventSource.addListener(this);
+        c.itemRemovedEventSource.addListener(this);
 
     }
 
+    @Override
+    public void onEvent(Container container, Item item) {
+        Log.d(TAG, "onEvent method called");
+        Log.d(TAG, "Container id: " + container.getId()
+                 + " Item id: " + item.getId());
+
+        dataSetObservable.notifyChanged();
+
+
+    }
 
     @Override
     public boolean areAllItemsEnabled() {
@@ -56,12 +73,14 @@ public class OhapListAdapter implements android.widget.ListAdapter {
 
     @Override
     public void registerDataSetObserver(DataSetObserver observer) {
-
+        Log.d(TAG, "registering observer...");
+        dataSetObservable.registerObserver(observer);
     }
 
     @Override
     public void unregisterDataSetObserver(DataSetObserver observer) {
-
+        Log.d(TAG, "unregistering observer...");
+        dataSetObservable.unregisterObserver(observer);
     }
 
 

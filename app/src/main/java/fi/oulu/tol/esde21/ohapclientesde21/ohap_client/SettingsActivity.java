@@ -19,8 +19,6 @@ public class SettingsActivity extends Activity {
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
 
-        //enable up navigation
-        getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
 

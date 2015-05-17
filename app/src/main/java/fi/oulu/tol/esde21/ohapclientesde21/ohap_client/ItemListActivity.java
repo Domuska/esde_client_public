@@ -2,7 +2,6 @@ package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -10,23 +9,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.ohap.ConnectionManager;
-import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.CentralUnit;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
-import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
-import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
 
 /**
  * Created by Domu on 07-Apr-15.
  *
- * Activity for displaying a list that holds a number of Items
+ * Activity for displaying a list that holds a number of Items, AKA ContainerActivity
  */
 
 
@@ -56,7 +50,7 @@ public class ItemListActivity extends Activity {
 
         //TODO: handle missing container ID
 
-        extraContainerId = getIntent().getLongExtra(EXTRA_CONTAINER_ID, -1);
+        extraContainerId = getIntent().getLongExtra(EXTRA_CONTAINER_ID, 0);
         Log.d(TAG, "Gotten container ID Extra: " + extraContainerId);
 
         extraURL = getIntent().getStringExtra(EXTRA_CENTRAL_UNIT_URL);
@@ -67,6 +61,7 @@ public class ItemListActivity extends Activity {
             URL centralUnitURL = new URL(extraURL);
 
             // if the ID we get is for the central unit under where we are, the container central unit itself
+            // note, this is most likely pointless since now with opimobi files 1.2 CU registers itself to its' list of items
             if(ConnectionManager.getInstance().getCentralUnit(centralUnitURL).getId() == extraContainerId) {
                 thisContainer = ConnectionManager.getInstance().getCentralUnit(centralUnitURL);
             }
@@ -78,13 +73,18 @@ public class ItemListActivity extends Activity {
             }
             Log.d(TAG, "URL: " + extraURL + " used to initialize container");
             Log.d(TAG, "Container name: " + thisContainer.getName());
+
         }
         catch (MalformedURLException e){
             Log.d(TAG, "URL extra from previous activity wasn't a proper url");
         }
 
+
+
+        thisContainer.startListening();
+
         listView = (ListView) findViewById(R.id.deviceListView);
-        listView.setAdapter(new OhapListAdapter(thisContainer));
+        listView.setAdapter(new ItemListAdapter(thisContainer));
 
 
         // listener for list's items
@@ -113,9 +113,6 @@ public class ItemListActivity extends Activity {
                 }
             }
         });
-
-        // set the up the "up" navigation
-        getActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 

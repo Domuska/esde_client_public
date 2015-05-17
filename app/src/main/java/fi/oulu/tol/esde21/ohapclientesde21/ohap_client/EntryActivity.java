@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +24,7 @@ public class EntryActivity extends Activity {
     static CentralUnitConnection centralUnit;
 
     private final static String EXTRA_PREFIX_STRING = "prefixData";
+    private final String TAG = "EntryActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +35,9 @@ public class EntryActivity extends Activity {
                 .getDefaultSharedPreferences(this);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
+        Log.d(TAG, "entering entryactivity");
         try {
+            Log.d(TAG, "creating new Central unit");
             URL url = new URL(sharedPref.getString("pref_key_URL", "http://www.google.com"));
             centralUnit = new CentralUnitConnection(url) {
             };
@@ -77,6 +80,7 @@ public class EntryActivity extends Activity {
     public void onEnterButtonClicked(View v){
 
         Intent i = new Intent(this, ItemListActivity.class);
+        Log.d(TAG, "putting extras in, CU name: "+ centralUnit.getName());
         i.putExtra(ItemListActivity.EXTRA_CONTAINER_ID, centralUnit.getId());
         i.putExtra(EXTRA_PREFIX_STRING, centralUnit.getName());
         i.putExtra(ItemListActivity.EXTRA_CENTRAL_UNIT_URL, centralUnit.getURL().toString());
@@ -85,6 +89,8 @@ public class EntryActivity extends Activity {
     }
 
 
+
+    //TODO: OBSOLETE, TO BE DELETED
     //class method for getting containers in the CU (or the CU itself).
     //gets an ID for the container that is wanted and returns the container in question,
     //it can be either a subcontainer in the central unit or the central unit itself.
@@ -94,6 +100,7 @@ public class EntryActivity extends Activity {
      * @param id for the item to be returned
      * @return returns item under the central unit with the given ID, or the central unit itself
      */
+    /*
     public static Item getCentralUnitItem(long id){
 
         if(id == centralUnit.getId()){
@@ -103,7 +110,7 @@ public class EntryActivity extends Activity {
             return centralUnit.getItemById(id);
         }
     }
-
+    */
 
 
 

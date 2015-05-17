@@ -26,7 +26,7 @@
     <string name="entryActivity_buttonText">ENTER</string>
 
     <!--preference strings -->
-    <string name="pref_URL_default">http://ohap.opimobi.com:8080/</string>
+    <string name="pref_URL_default">http://ohap.opimobi.com:18000/</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
     <string name="hello_world">Hello world!</string>
