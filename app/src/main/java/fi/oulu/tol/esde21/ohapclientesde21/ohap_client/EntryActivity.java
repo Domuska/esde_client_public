@@ -15,9 +15,7 @@ import java.net.URL;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.ohap.CentralUnitConnection;
-import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
-import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
-import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Item;
+import fi.oulu.tol.esde21.ohapclientesde21.ohap.ConnectionManager;
 
 public class EntryActivity extends Activity {
 
@@ -38,12 +36,13 @@ public class EntryActivity extends Activity {
         Log.d(TAG, "entering entryactivity");
         try {
             Log.d(TAG, "creating new Central unit");
-            URL url = new URL(sharedPref.getString("pref_key_URL", "http://www.google.com"));
-            centralUnit = new CentralUnitConnection(url) {
-            };
+            URL url = new URL(sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_PREFERENCE, getString(R.string.pref_URL_default)));
+            String userName = sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_USERNAME, getString(R.string.pref_userName_default));
+            String password = sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_PASSWORD, getString(R.string.pref_password_default));
+            centralUnit = ConnectionManager.getInstance().createCentralUnit(url, userName, password);
         }
         catch (MalformedURLException e){
-            //do stuff with the exception...
+            Log.d(TAG, "ERROR: URL stored in preferences was invalid. How is this possible?!");
         }
 
 
@@ -59,9 +58,6 @@ public class EntryActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -84,35 +80,7 @@ public class EntryActivity extends Activity {
         i.putExtra(ItemListActivity.EXTRA_CONTAINER_ID, centralUnit.getId());
         i.putExtra(EXTRA_PREFIX_STRING, centralUnit.getName());
         i.putExtra(ItemListActivity.EXTRA_CENTRAL_UNIT_URL, centralUnit.getURL().toString());
-
         startActivity(i);
     }
-
-
-
-    //TODO: OBSOLETE, TO BE DELETED
-    //class method for getting containers in the CU (or the CU itself).
-    //gets an ID for the container that is wanted and returns the container in question,
-    //it can be either a subcontainer in the central unit or the central unit itself.
-
-    /**
-     *
-     * @param id for the item to be returned
-     * @return returns item under the central unit with the given ID, or the central unit itself
-     */
-    /*
-    public static Item getCentralUnitItem(long id){
-
-        if(id == centralUnit.getId()){
-            return centralUnit;
-        }
-        else{
-            return centralUnit.getItemById(id);
-        }
-    }
-    */
-
-
-
 
 }

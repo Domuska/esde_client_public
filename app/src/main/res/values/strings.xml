@@ -18,20 +18,28 @@
     <string name="action_enable_monitoring">Enable monitoring</string>
     <string name="action_disable_monitoring">Disable monitoring</string>
 
-
-
     <!--entry_activity strings -->
     <string name="entryActivity_infoText">Hello! Welcome to OHAP smart-home remote device app thingy!</string>
     <string name="title_activity_entry">EntryActivity</string>
     <string name="entryActivity_buttonText">ENTER</string>
 
     <!--preference strings -->
-    <string name="pref_URL_default">http://ohap.opimobi.com:18000/</string>
+    <string name="preferences_password">Password</string>
+    <string name="preferences_userName">User name</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="prefences_urlError">Sorry, entered URL was malformed, default URL restored</string>
+    <string name="preferenceCategory_server">SERVER</string>
+    <string name="preferenceCategory_loginInfo">LOGIN INFORMATION</string>
 
-    <string name="hello_world">Hello world!</string>
 
-    <!-- settings fragment strings -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- preference default values -->
+    <string name="pref_URL_default">http://ohap.opimobi.com:18000/</string>
+    <string name="pref_userName_default">Domuska</string>
+    <string name="pref_password_default">ra7f2mYL</string>
+
+    <!-- preference field names -->
+    <string name="pref_field_URL">pref_key_URL</string>
+    <string name="pref_field_userName">pref_key_userName</string>
+    <string name="pref_field_password">pref_key_password</string>
 
 </resources>

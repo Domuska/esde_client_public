@@ -1,7 +1,10 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap;
 
+import android.app.AlertDialog;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.io.IOException;
@@ -27,13 +30,17 @@ public class CentralUnitConnection extends CentralUnit{
     private InputStream inputStream;
     private OutputStream outputStream;
 
+    private String loginName;
+    private String password;
 
 
-    public CentralUnitConnection(URL url){
+
+    public CentralUnitConnection(URL url, String loginName, String password){
         super(url);
-        //populateCU();
-        thisConnection = this;
 
+        thisConnection = this;
+        this.loginName = loginName;
+        this.password = password;
     }
 
     @Override
@@ -85,21 +92,11 @@ public class CentralUnitConnection extends CentralUnit{
     @Override
     protected void changeBinaryValue(Device device, boolean value) {
 
-        long devicesId = device.getId();
-
-        //TODO: alla olevan viestin l‰hetysyritys heitt‰‰ virheen jos devicen ID on 2, se saa olla mik‰ tahansa muu. Wat?
-
         OutgoingMessage outgoingPingMessage = new OutgoingMessage();
         outgoingPingMessage.integer8(0x0a)
                 .integer32(device.getId())
                 .binary8(value)
                 .writeTo(outputStream);
-
-        /*OutgoingMessage outgoingPingMessage = new OutgoingMessage();
-        outgoingPingMessage.integer8(2)
-                .integer32(5)
-                .writeTo(outputStream);*/
-
     }
 
     @Override
@@ -108,15 +105,6 @@ public class CentralUnitConnection extends CentralUnit{
         Log.d(TAG, "sending value change request (decimal) to server, device(decimal) id: " + device.getId()
                 + " value " + value);
         //code for decimal value change 0x09
-
-
-        /*OutgoingMessage outgoingPingMessage = new OutgoingMessage();
-        outgoingPingMessage.integer8(0x0a)
-                .integer32(device.getId())
-                .binary8(true)
-                .writeTo(outputStream);*/
-
-
         OutgoingMessage outgoingMessage = new OutgoingMessage();
         outgoingMessage.integer8(0x09)
                 .integer32(device.getId())
@@ -133,15 +121,22 @@ public class CentralUnitConnection extends CentralUnit{
 
         Log.d(TAG, "startNetworking, gotten connections");
 
-
         //log in into the server
-        // TODO: get login credentials from shared preferences
+        /*
         OutgoingMessage outgoingMessage = new OutgoingMessage();
         outgoingMessage.integer8(0x00)      // message-type-login
                 .integer8(0x01)      // protocol-version
                 .text("Domuska")        // login-name
                 .text("ra7f2mYL")    // login-password
                 .writeTo(outputStream);
+        */
+        OutgoingMessage outgoingMessage = new OutgoingMessage();
+        outgoingMessage.integer8(0x00)      // message-type-login
+                .integer8(0x01)      // protocol-version
+                .text(loginName)        // login-name
+                .text(password)    // login-password
+                .writeTo(outputStream);
+
         Log.d(TAG, "login stuff sent to germany");
 
         new HandlerThread().start();
@@ -180,7 +175,7 @@ public class CentralUnitConnection extends CentralUnit{
 
     }
 
-    private void sendListeningStop(Container container){
+    private void sendListeningStop(Container container) {
 
         Log.d(TAG, "sending request to stop to listen to container " + container.getName()
                 + " id: " + container.getId());
@@ -192,61 +187,9 @@ public class CentralUnitConnection extends CentralUnit{
         Log.d(TAG, "stopListening stuff sent to germany");
     }
 
-    //create dummy data
-    private void populateCU(){
-
-        this.setName("OHAP Test server");
-
-        Device device = new Device(this, 1, Device.Type.ACTUATOR, Device.ValueType.DECIMAL );
-        device.setDecimalValue(70);
-        device.setMinMaxValues(0, 100);
-
-        device.setName("A bloody ceiling lamp");
-        device.setDescription("A lamp. In ceiling. It is not actually bloody.");
-
-        Device device2 = new Device (this, 2, Device.Type.ACTUATOR, Device.ValueType.BINARY);
-        device2.setName("Another sodding lamp");
-        device2.setDescription("Old lamp. On or off.");
-        device2.changeBinaryValue(true);
-
-
-        Device device3 = new Device (this, 3, Device.Type.SENSOR, Device.ValueType.BINARY);
-        device3.setName("Fancy hi-tech lamp's sensor");
-        device3.setDescription("Sensor sensing the fancy lamp.");
-        device3.setBinaryValue(true);
-
-        Container container1 = new Container(this, 4);
-        container1.setName("Seppo's working room");
-        container1.setDescription("The wonderful room of Seppo, 5/5. No one will see this text!");
-
-        Container container2 = new Container(this, 6);
-        container2.setName("Hermandos' Working Closet");
-
-        Device device4 = new Device(container1, 5, Device.Type.ACTUATOR, Device.ValueType.BINARY);
-        device4.setName("Surprise device!");
-
-
-
-        Container container3 = new Container(container1, 7);
-        container3.setName("Seppo's room's broom closet");
-
-        // let's create a couple more to for testing memory usage and responsiveness...
-        for(int i = 8; i < 155; i++){
-
-            Device deviceFor = new Device(container1, i, Device.Type.SENSOR, Device.ValueType.DECIMAL);
-            deviceFor.setName("Markku Markkula proximity sensor");
-            deviceFor.setDescription("Sensor for calculating the propability of Markku Markkula approaching");
-            deviceFor.setMinMaxValues(0, 100);
-
-            deviceFor.setDecimalValue(5);
-        }
-
-    }
-
 
 
     // Thread for handling incoming messages and delivering them to responsible activities
-
     private class HandlerThread extends Thread{
 
         Handler handler = new Handler(Looper.getMainLooper());
@@ -254,26 +197,16 @@ public class CentralUnitConnection extends CentralUnit{
         @Override
         public void run() {
 
-            //TODO: not sure if this variable is actually necessary, test to see if stuff breaks when it's removed
             boolean loopVariable = true;
 
-
-
-            //IncomingMessage incomingMessage = new IncomingMessage();
             Log.d(TAG, "going into the handlerThread loop...");
-
 
             while (loopVariable) {
                 final IncomingMessage incomingMessage = new IncomingMessage();
                 // dont try to read from the stream unless there's no problems
-                // (IncomingMessage will return false if there's an exception while reading)
                 if (incomingMessage.readFrom(inputStream) == true) {
-                    //IncomingMessage incomingMessage = new IncomingMessage();
-                    //incomingMessage.readFrom(inputStream);
                     Log.d(TAG, "posting a new handler");
                     handler.post(new IncomingMessageHandler(incomingMessage));
-
-
 
                 }
                 else{
@@ -291,10 +224,8 @@ public class CentralUnitConnection extends CentralUnit{
                 new HandlerThread().run();
                 loopVariable = false;
             }
-            //Log.d(TAG, "Starting a new HandlerThread...");
-            //new HandlerThread().run();
-        } // run ends
-    } //handlerThread ends
+        }   // run ends
+    }       // handlerThread ends
 
 
     private class IncomingMessageHandler implements Runnable{
@@ -342,7 +273,7 @@ public class CentralUnitConnection extends CentralUnit{
                     Log.d(TAG, "message received: logout");
                     String errorText = storedMessage.text();
                     Log.d(TAG, "logout error message: " + errorText);
-                    //TODO: how to inform user that he's been logged out?
+                    //TODO: inform user of log out
                     break;
 
                 case 0x02: //ping

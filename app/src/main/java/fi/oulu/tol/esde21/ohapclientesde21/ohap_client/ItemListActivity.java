@@ -48,8 +48,6 @@ public class ItemListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_item_list);
 
-        //TODO: handle missing container ID
-
         extraContainerId = getIntent().getLongExtra(EXTRA_CONTAINER_ID, 0);
         Log.d(TAG, "Gotten container ID Extra: " + extraContainerId);
 

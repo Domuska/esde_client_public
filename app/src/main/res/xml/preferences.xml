@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/preferenceCategory_server">
+
         <EditTextPreference
-            android:key="pref_key_URL"
+            android:key="@string/pref_field_URL"
             android:title="URL"
             android:summary=""
             android:defaultValue="@string/pref_URL_default" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="@string/preferenceCategory_loginInfo">
+
+        <EditTextPreference
+            android:key="@string/pref_field_userName"
+            android:title="@string/preferences_userName"
+            android:defaultValue="@string/pref_userName_default" />
+
+        <EditTextPreference
+            android:key="@string/pref_field_password"
+            android:title="@string/preferences_password"
+            android:defaultValue="@string/pref_password_default"/>
+
     </PreferenceCategory>
 </PreferenceScreen>

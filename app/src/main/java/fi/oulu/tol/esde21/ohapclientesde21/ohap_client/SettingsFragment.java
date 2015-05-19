@@ -9,16 +9,25 @@ import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 
 public class SettingsFragment extends PreferenceFragment
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+        implements SharedPreferences.OnSharedPreferenceChangeListener{
 
-    private static final String KEY_EDIT_TEXT_PREFERENCE = "pref_key_URL";
+    public static final String KEY_EDIT_TEXT_PREFERENCE = "pref_key_URL";
+    public static final String KEY_EDIT_TEXT_USERNAME = "pref_key_userName";
+    public static final String KEY_EDIT_TEXT_PASSWORD = "pref_key_password";
+
+    private final String TAG = "SettingsFragment";
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -32,6 +41,38 @@ public class SettingsFragment extends PreferenceFragment
 
         //Context context = getActivity();
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+
+        EditTextPreference userNamePreference = (EditTextPreference)findPreference(KEY_EDIT_TEXT_USERNAME);
+        userNamePreference.setSummary(userNamePreference.getText());
+
+        EditTextPreference urlPreference = (EditTextPreference)findPreference(KEY_EDIT_TEXT_PREFERENCE);
+
+        //set listener to check if the entered string is a valid URL
+        urlPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                boolean isSuccessful = false;
+                EditTextPreference pref = (EditTextPreference) preference;
+                String urlString = (String)newValue;
+
+                //just try to create a new URL to see if it is valid, we don't need it for anything
+                try{
+                    new URL (urlString);
+                    isSuccessful = true;
+                }
+                catch(MalformedURLException e){
+                    Log.d(TAG, "malformed url exception caught, error text shown");
+                    pref.setText("http://ohap.opimobi.com:18000/");
+                    Toast.makeText(getActivity()
+                            ,getString(R.string.prefences_urlError)
+                            ,Toast.LENGTH_LONG)
+                            .show();
+                }
+
+                return isSuccessful;
+            }
+        });
 
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
@@ -56,19 +97,27 @@ public class SettingsFragment extends PreferenceFragment
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         updatePreference(key);
+
     }
+
     private void updatePreference(String key){
+
+        EditTextPreference preference = (EditTextPreference) findPreference(key);
+        preference.setSummary(preference.getText());
+
+        /*
         if (key.equals(KEY_EDIT_TEXT_PREFERENCE)){
             Preference preference = findPreference(key);
             if (preference instanceof EditTextPreference){
                 EditTextPreference editTextPreference =  (EditTextPreference)preference;
                 if (editTextPreference.getText().trim().length() > 0){
+
                     editTextPreference.setSummary(editTextPreference.getText());
                 }else{
                     editTextPreference.setSummary("http://ohap.opimobi.com:18000/");
                 }
             }
-        }
+        }*/
     }
 
 }

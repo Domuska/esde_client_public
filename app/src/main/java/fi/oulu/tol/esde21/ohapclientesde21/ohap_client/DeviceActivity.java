@@ -57,7 +57,6 @@ public class DeviceActivity extends Activity {
     // the value into sharedPreferences?
     Boolean isTracked = true;
 
-    //static final String DEVICE_ID = "deviceId";
     private static final String TAG = "DeviceActivity";
 
     public static final String EXTRA_CENTRAL_UNIT_URL = "fi.oulu.tol.esde21.CENTRAL_UNIT_URL";
@@ -91,7 +90,6 @@ public class DeviceActivity extends Activity {
         if(deviceId != 0) {
             //get the item from the ItemListActivity's public list of items, cast it into Device.
             //This might be a source of bugs, since here there are no checks if the item we get is an actual device or not
-            //aDevice = (Device)EntryActivity.getCentralUnitItem(deviceId);
             aDevice = (Device) centralUnit.getItemById(deviceId);
 
             deviceName = (TextView) findViewById(R.id.DeviceName);
@@ -158,8 +156,6 @@ public class DeviceActivity extends Activity {
                         currentValue.setText(Double.toString(newProgress));
                     }
                 });
-
-
             }
 
             //if device is a sensor, set switch and seekbar disabled
@@ -176,10 +172,6 @@ public class DeviceActivity extends Activity {
 
 
             setTitle(aDevice.getName());
-
-
-
-
 
             Container parentVariable = aDevice.getParent();
             String prefix_ = "";
@@ -285,12 +277,10 @@ public class DeviceActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-
+        //TODO: save monitoring status into shared preferences
         //noinspection SimplifiableIfStatement
         if (id == R.id.monitor_enable) {
             isTracked = true;
