@@ -1,18 +1,12 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.net.MalformedURLException;
@@ -42,6 +36,7 @@ public class SettingsFragment extends PreferenceFragment
         //Context context = getActivity();
         //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
 
+        //set summary for the user name preference
         EditTextPreference userNamePreference = (EditTextPreference)findPreference(KEY_EDIT_TEXT_USERNAME);
         userNamePreference.setSummary(userNamePreference.getText());
 
@@ -103,7 +98,11 @@ public class SettingsFragment extends PreferenceFragment
     private void updatePreference(String key){
 
         EditTextPreference preference = (EditTextPreference) findPreference(key);
-        preference.setSummary(preference.getText());
+
+        //do not set the summary text visible for the password, let's keep it a secret!
+        if(!preference.getKey().equals(KEY_EDIT_TEXT_PASSWORD))
+            preference.setSummary(preference.getText());
+
 
         /*
         if (key.equals(KEY_EDIT_TEXT_PREFERENCE)){

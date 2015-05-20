@@ -35,10 +35,18 @@ public class CentralUnitConnection extends CentralUnit{
 
 
 
-    public CentralUnitConnection(URL url, String loginName, String password){
+    public CentralUnitConnection(URL url){
         super(url);
 
         thisConnection = this;
+
+    }
+
+    /**
+     * Set the login credentials for this particular central unit connection
+     *
+     */
+    public void setLoginCredentials (String loginName, String password){
         this.loginName = loginName;
         this.password = password;
     }
@@ -67,31 +75,13 @@ public class CentralUnitConnection extends CentralUnit{
         }
     }
 
-    /*@Override
-    protected void changeBinaryValue(Device device, boolean value) {
-
-        Log.d(TAG, "starting to send value change request (binary) to server, device(binary) id: " + device.getId()
-                    + "value: " + value);
-
-        if(outputStream != null)
-            Log.d(TAG, "changeBinaryValue: outputstream is not null");
-        else
-            Log.d(TAG, "WARNING: changeBinaryValue: outputstream is NULL!");
-
-        Log.d(TAG, "changeBinaryValue: " + 0x0a + " " + device.getId() + " " + value);
-        OutgoingMessage outgoingMessage = new OutgoingMessage();
-        outgoingMessage.integer8(0x0a)
-                .integer32(device.getId())
-                .binary8(value)
-                .writeTo(outputStream);
-
-        new HandlerThread().start();
-
-    }*/
-
     @Override
     protected void changeBinaryValue(Device device, boolean value) {
 
+        Log.d(TAG,  "sending value change request (binary) to server, device id: " + device.getId()
+                + " value " + value);
+
+        // code for changing binary actuator's value is 0x0a
         OutgoingMessage outgoingPingMessage = new OutgoingMessage();
         outgoingPingMessage.integer8(0x0a)
                 .integer32(device.getId())
@@ -102,9 +92,9 @@ public class CentralUnitConnection extends CentralUnit{
     @Override
     protected void changeDecimalValue(Device device, double value) {
 
-        Log.d(TAG, "sending value change request (decimal) to server, device(decimal) id: " + device.getId()
+        Log.d(TAG, "sending value change request (decimal) to server, device id: " + device.getId()
                 + " value " + value);
-        //code for decimal value change 0x09
+        // code for changing decimal actuator's value is 0x09
         OutgoingMessage outgoingMessage = new OutgoingMessage();
         outgoingMessage.integer8(0x09)
                 .integer32(device.getId())
@@ -122,14 +112,6 @@ public class CentralUnitConnection extends CentralUnit{
         Log.d(TAG, "startNetworking, gotten connections");
 
         //log in into the server
-        /*
-        OutgoingMessage outgoingMessage = new OutgoingMessage();
-        outgoingMessage.integer8(0x00)      // message-type-login
-                .integer8(0x01)      // protocol-version
-                .text("Domuska")        // login-name
-                .text("ra7f2mYL")    // login-password
-                .writeTo(outputStream);
-        */
         OutgoingMessage outgoingMessage = new OutgoingMessage();
         outgoingMessage.integer8(0x00)      // message-type-login
                 .integer8(0x01)      // protocol-version
@@ -137,7 +119,8 @@ public class CentralUnitConnection extends CentralUnit{
                 .text(password)    // login-password
                 .writeTo(outputStream);
 
-        Log.d(TAG, "login stuff sent to germany");
+        Log.d(TAG, "login stuff sent to germany, user name: " + loginName
+                + " password: " + password);
 
         new HandlerThread().start();
 
@@ -145,7 +128,7 @@ public class CentralUnitConnection extends CentralUnit{
 
     private void stopNetworking(){
 
-        Log.d(TAG, "logging out");
+        Log.d(TAG, "starting to send log out message");
         OutgoingMessage outgoingMessage = new OutgoingMessage();
         outgoingMessage.integer8(0x01)
                 .text("")
@@ -157,7 +140,6 @@ public class CentralUnitConnection extends CentralUnit{
         }
         catch(IOException e){
             Log.d(TAG, "exception when closing the outputStream");
-            //TODO: handle the exception better?
         }
 
     }
@@ -193,6 +175,7 @@ public class CentralUnitConnection extends CentralUnit{
     private class HandlerThread extends Thread{
 
         Handler handler = new Handler(Looper.getMainLooper());
+        int attempts;
 
         @Override
         public void run() {
@@ -225,14 +208,14 @@ public class CentralUnitConnection extends CentralUnit{
                 loopVariable = false;
             }
         }   // run ends
-    }       // handlerThread ends
+    }   // handlerThread ends
 
 
     private class IncomingMessageHandler implements Runnable{
 
         IncomingMessage storedMessage;
 
-        //stuff for all items
+        //fields for all items
         long itemIdentifier;
         long itemParentIdentifier;
         String itemName;
@@ -243,15 +226,16 @@ public class CentralUnitConnection extends CentralUnit{
         double itemCoordinateZ;
 
 
-        //stuff for decimal devices
+        //fields for decimal devices
         double decimalValue;
         double decimalMin;
         double decimalMax;
         String decimalUnit;
         String decimalAbbreviation;
 
-        //stuff for binary devices
+        //fields for binary devices
         boolean binaryValue;
+
 
         public IncomingMessageHandler(IncomingMessage message){
             storedMessage = message;
@@ -384,13 +368,10 @@ public class CentralUnitConnection extends CentralUnit{
                             .destroy();
                     break;
 
-
                 default:
                     Log.d(TAG, "message received: unknown");
                     break;
             }
-
-
 
         }
 

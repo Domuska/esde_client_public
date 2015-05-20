@@ -39,7 +39,8 @@ public class EntryActivity extends Activity {
             URL url = new URL(sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_PREFERENCE, getString(R.string.pref_URL_default)));
             String userName = sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_USERNAME, getString(R.string.pref_userName_default));
             String password = sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_PASSWORD, getString(R.string.pref_password_default));
-            centralUnit = ConnectionManager.getInstance().createCentralUnit(url, userName, password);
+            centralUnit = ConnectionManager.getInstance().getCentralUnit(url);
+            centralUnit.setLoginCredentials(userName, password);
         }
         catch (MalformedURLException e){
             Log.d(TAG, "ERROR: URL stored in preferences was invalid. How is this possible?!");

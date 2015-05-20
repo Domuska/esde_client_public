@@ -40,29 +40,16 @@ public class ConnectionManager {
     /**
      * Creates a new central unit with the given URL, user name and password and returns it
      * @param url URL for the central unit
-     * @param userName User name with which to log in
-     * @param password Password which to use to log in
      * @return returns the instance of the central unit
      */
-    public CentralUnitConnection createCentralUnit(URL url, String userName, String password){
+    public CentralUnitConnection getCentralUnit(URL url){
 
         Log.d(TAG, "getCentralUnit called with url: " + url.toString());
         if (connections.get(url) == null){
-            connections.put(url, new CentralUnitConnection(url, userName, password));
+            connections.put(url, new CentralUnitConnection(url));
         }
         Log.d(TAG, "central unit connection's name: " + connections.get(url).getName());
         return connections.get(url);
     }
 
-    /**
-     * get a central unit from the ConnectionManager singleton class
-     * @param url url for the central unit
-     * @return a central unit with the given url or NULL if no central unit was found
-     */
-    public CentralUnitConnection getCentralUnit(URL url){
-
-        Log.d(TAG, "getCentralUnit called with url: " + url.toString());
-        Log.d(TAG, "central unit connection's name: " + connections.get(url).getName());
-        return connections.get(url);
-    }
 }
