@@ -1,16 +1,23 @@
 package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.hardware.TriggerEvent;
+import android.hardware.TriggerEventListener;
+import android.os.Build;
 import android.os.CountDownTimer;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
 import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -19,7 +26,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Switch;
@@ -29,6 +35,7 @@ import android.widget.Toast;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Random;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.ohap.CentralUnitConnection;
@@ -37,7 +44,7 @@ import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 
 
-public class DeviceActivity extends Activity {
+public class DeviceActivity extends Activity implements SensorEventListener {
 
     Device aDevice;
     TextView deviceName;
@@ -52,6 +59,11 @@ public class DeviceActivity extends Activity {
     Button setButton;
 
     Activity thisActivity;
+
+    private SensorManager mSensorManager;
+    private Sensor mSensorSignificant = null;
+    private TriggerEventListener mListener = new TriggerListener();
+    SharedPreferences sharedPref;
 
     // let's use a hard coded value for now, perhaps later on put
     // the value into sharedPreferences?
@@ -75,6 +87,9 @@ public class DeviceActivity extends Activity {
 
         long deviceId = getIntent().getLongExtra(EXTRA_DEVICE_ID, 0);
 
+        sharedPref = PreferenceManager
+                .getDefaultSharedPreferences(this);
+
 
         try {
             centralUnitUrl = new URL(getIntent().getStringExtra(EXTRA_CENTRAL_UNIT_URL));
@@ -85,6 +100,12 @@ public class DeviceActivity extends Activity {
 
         centralUnit = ConnectionManager.getInstance().getCentralUnit(centralUnitUrl);
         thisActivity = this;
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+
+
+
+
 
 
         if(deviceId != 0) {
@@ -123,7 +144,6 @@ public class DeviceActivity extends Activity {
             }
             //if device isn't binary it is decimal so hide binary device UI elements and set values
             //for decimal device
-            //TODO: check for invalid values (0-100 valid atm)
             else {
                 aSwitch.setVisibility(View.GONE);
 
@@ -131,6 +151,7 @@ public class DeviceActivity extends Activity {
                 deviceMaxValue.setText(Double.toString(aDevice.getMaxValue()));
                 currentValue.setText(Double.toString(aDevice.getDecimalValue()));
 
+                //TODO: should seekbar be used? values can't go under 0...
                 seekbar.setMax((int) aDevice.getMaxValue());
                 seekbar.setProgress((int) aDevice.getDecimalValue());
 
@@ -189,6 +210,20 @@ public class DeviceActivity extends Activity {
             devicePath.setText(prefix_);
 
 
+
+
+            // if user has set in setting sensor activity to be on, initialize sensor business
+            if(sharedPref.getBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, true)) {
+
+                // check if the current API level is enough for this sensor and that the device is an actuator
+                if (Build.VERSION.SDK_INT >= 18 && (aDevice.getType() == Device.Type.ACTUATOR))
+                    mSensorSignificant = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+
+            }
+
+
+
+
             // create a notification to be fired when the activity is created (this will change later to actually respond to changes in the actual device)
             // http://developer.android.com/guide/topics/ui/notifiers/notifications.html#CreateNotification
             final NotificationCompat.Builder mBuilder =
@@ -243,6 +278,30 @@ public class DeviceActivity extends Activity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // if mSensorSignificant is null, then API level is too low for Significant Motion Sensor
+        if(mSensorSignificant != null){
+            mSensorManager.registerListener(this, mSensorSignificant, SensorManager.SENSOR_DELAY_NORMAL);
+            mSensorManager.requestTriggerSensor(mListener, mSensorSignificant);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // if mSensorSignificant is null, then API level is too low for Significant Motion Sensor
+        if(mSensorSignificant != null){
+            mSensorManager.unregisterListener(this);
+            mSensorManager.cancelTriggerSensor(mListener, mSensorSignificant);
+
+        }
+
+    }
+
     // override the onMenuOpened method to set icons visible in the overflow menu
     // credit to Simon @ http://stackoverflow.com/questions/18374183/how-to-show-icons-in-overflow-menu-in-actionbar
     @Override
@@ -278,18 +337,55 @@ public class DeviceActivity extends Activity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
+        SharedPreferences.Editor editor = sharedPref.edit();
         int id = item.getItemId();
 
-        //TODO: save monitoring status into shared preferences
-        //noinspection SimplifiableIfStatement
         if (id == R.id.monitor_enable) {
             isTracked = true;
+            //TODO: save value in preferences for this device
             return true;
         }
         if(id == R.id.monitor_disable){
             isTracked = false;
+            //TODO: save value in preferences for this device
             return true;
         }
+        if(id == R.id.sensor_enable_disable){
+            // the button is a toggle, if current value is true set shared pref value to false and other way around
+            if(sharedPref.getBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, true)) {
+                editor.putBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, false);
+                Log.d(TAG, "setting shared pref value to false");
+
+                Toast.makeText(this, getResources().getString(R.string.device_sensorDisable),
+                                Toast.LENGTH_SHORT).show();
+
+
+                if(mSensorSignificant != null){
+                    mSensorManager.unregisterListener(this);
+                    mSensorManager.cancelTriggerSensor(mListener, mSensorSignificant);
+
+                }
+
+                editor.commit();
+            }
+            else {
+                editor.putBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, true);
+                Log.d(TAG, "setting shared pref value to true");
+
+                Toast.makeText(this, getResources().getString(R.string.device_sensorEnable),
+                        Toast.LENGTH_SHORT).show();
+
+                if(mSensorSignificant != null){
+                    mSensorManager.registerListener(this, mSensorSignificant, SensorManager.SENSOR_DELAY_NORMAL);
+                    mSensorManager.requestTriggerSensor(mListener, mSensorSignificant);
+                }
+
+                editor.commit();
+            }
+
+            return true;
+        }
+
         if(id == android.R.id.home){
             Intent i = NavUtils.getParentActivityIntent(this);
             // if the activity is on Android's back stack, do not recreate the activity
@@ -330,5 +426,55 @@ public class DeviceActivity extends Activity {
         aDevice.changeBinaryValue(status);
     }
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+    }
+
+    // inner class for the significant motion sensor
+    class TriggerListener extends TriggerEventListener{
+
+        Random random = new Random();
+
+        @Override
+        public void onTrigger(TriggerEvent e){
+
+            if(aDevice.getValueType() == Device.ValueType.DECIMAL) {
+                int newInt = random.nextInt(((int)aDevice.getMaxValue() - (int)aDevice.getMinValue() + 1) + (int)aDevice.getMinValue());
+                aDevice.changeDecimalValue(newInt);
+
+                Toast.makeText(thisActivity,
+                                getResources().getString(R.string.device_sensorToast)
+                                + newInt,
+                                Toast.LENGTH_SHORT).show();
+
+                Log.d(TAG, "set random decimal value as " + newInt);
+                seekbar.setProgress(newInt);
+                currentValue.setText(Integer.toString(newInt));
+            }
+            else{
+                boolean newBoolean = random.nextBoolean();
+                aDevice.changeBinaryValue(newBoolean);
+
+                Toast.makeText(thisActivity,
+                                getResources().getString(R.string.device_sensorToast)
+                                + newBoolean,
+                                Toast.LENGTH_SHORT).show();
+
+                Log.d(TAG, "set random binary value as " + newBoolean);
+                aSwitch.setChecked(newBoolean);
+
+            }
+
+            // re-register trigger since significant motion sensor is fire-once only
+            mSensorManager.requestTriggerSensor(this, mSensorSignificant);
+        }
+
+
+    }
 }

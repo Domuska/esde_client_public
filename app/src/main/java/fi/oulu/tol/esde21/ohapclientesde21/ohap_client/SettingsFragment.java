@@ -3,6 +3,7 @@ package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -20,6 +21,7 @@ public class SettingsFragment extends PreferenceFragment
     public static final String KEY_EDIT_TEXT_PREFERENCE = "pref_key_URL";
     public static final String KEY_EDIT_TEXT_USERNAME = "pref_key_userName";
     public static final String KEY_EDIT_TEXT_PASSWORD = "pref_key_password";
+    public static final String KEY_CHECKBOX_SENSOR = "pref_key_sensor";
 
     private final String TAG = "SettingsFragment";
 
@@ -97,11 +99,16 @@ public class SettingsFragment extends PreferenceFragment
 
     private void updatePreference(String key){
 
-        EditTextPreference preference = (EditTextPreference) findPreference(key);
+        Preference preference = findPreference(key);
 
-        //do not set the summary text visible for the password, let's keep it a secret!
-        if(!preference.getKey().equals(KEY_EDIT_TEXT_PASSWORD))
-            preference.setSummary(preference.getText());
+        
+        if(preference instanceof  EditTextPreference) {
+            EditTextPreference editTextPreference = (EditTextPreference) findPreference(key);
+
+            //do not set the summary text visible for the password, let's keep it a secret!
+            if(!preference.getKey().equals(KEY_EDIT_TEXT_PASSWORD))
+                editTextPreference.setSummary(editTextPreference.getText());
+        }
 
 
         /*

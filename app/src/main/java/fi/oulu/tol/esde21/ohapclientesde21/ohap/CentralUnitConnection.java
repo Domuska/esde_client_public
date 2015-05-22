@@ -175,7 +175,7 @@ public class CentralUnitConnection extends CentralUnit{
     private class HandlerThread extends Thread{
 
         Handler handler = new Handler(Looper.getMainLooper());
-        int attempts;
+        int attempts = 0;
 
         @Override
         public void run() {
@@ -192,9 +192,11 @@ public class CentralUnitConnection extends CentralUnit{
                     handler.post(new IncomingMessageHandler(incomingMessage));
 
                 }
+
                 else{
                     try{
                         Log.d(TAG, "sleeping for 500ms...");
+                        attempts++;
                         sleep(500);
                     }
                     catch(InterruptedException ie){
@@ -203,9 +205,13 @@ public class CentralUnitConnection extends CentralUnit{
                     }
                 }
 
-                Log.d(TAG, "Starting a new HandlerThread...");
-                new HandlerThread().run();
-                loopVariable = false;
+                Log.d(TAG, "Starting a new round in the loop...");
+
+                //stop the loop if in 20 seconds (40 * 500ms) connection hasn't been established
+                if(attempts > 40) {
+                    Log.d(TAG, "stopping loop, connection not established");
+                    loopVariable = false;
+                }
             }
         }   // run ends
     }   // handlerThread ends

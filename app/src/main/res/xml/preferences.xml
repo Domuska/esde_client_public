@@ -26,4 +26,15 @@
             android:defaultValue="@string/pref_password_default"/>
 
     </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/preferenceCategory_sensors" >
+
+        <CheckBoxPreference
+            android:key="@string/pref_field_sensor"
+            android:title="@string/preferences_setSensor"
+            android:defaultValue="true" />
+
+
+    </PreferenceCategory>
 </PreferenceScreen>

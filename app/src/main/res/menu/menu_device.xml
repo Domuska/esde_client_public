@@ -17,6 +17,13 @@
         app:showAsAction="never"
         android:icon="@drawable/ic_sync_disabled_black_24dp"/>
 
+    <item
+        android:id="@+id/sensor_enable_disable"
+        android:title="@string/action_set_sensor"
+        android:orderInCategory="3"
+        app:showAsAction="never"
+        android:icon="@drawable/ic_android_black_24dp" />
+
 
 
 </menu>

@@ -29,11 +29,20 @@ public class EntryActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_entry);
 
+    }
+
+
+    // get a new CU from ConnectionManager here so if we return from settingsActivity,
+    // we'll get the new connection info from shared preferences
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart method starting");
+
         SharedPreferences sharedPref = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        Log.d(TAG, "entering entryactivity");
         try {
             Log.d(TAG, "creating new Central unit");
             URL url = new URL(sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_PREFERENCE, getString(R.string.pref_URL_default)));
@@ -43,12 +52,11 @@ public class EntryActivity extends Activity {
             centralUnit.setLoginCredentials(userName, password);
         }
         catch (MalformedURLException e){
-            Log.d(TAG, "ERROR: URL stored in preferences was invalid. How is this possible?!");
+            Log.d(TAG, "ERROR: URL stored in preferences was invalid. Why wasn't this checked in preferences?");
         }
 
 
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
