@@ -155,13 +155,28 @@ public class DeviceActivity extends Activity implements SensorEventListener {
             else {
                 aSwitch.setVisibility(View.GONE);
 
-                deviceMinValue.setText(Double.toString(aDevice.getMinValue()));
+                // forced to resort to some mathematics in order to pretend the seekbar has a minimum value of less than 0
+                // negativeRange contains the absolute value of how far into the negatives the actuator can go, initially 0.0
+                // deviceActualMin says what the actual minimum and negative value is, if there is one
+
+                Double negativeRange = 0.0;
+                Double deviceActualMin = 0.0;
+
+                // this if-block makes the necessary calculations if the actuator has any negatives
+                if(aDevice.getMinValue() < 0)
+                {
+                    negativeRange = Math.abs(aDevice.getMinValue());
+                    deviceActualMin = (0 - negativeRange);
+                }
+
+                deviceMinValue.setText(Double.toString(deviceActualMin));
                 deviceMaxValue.setText(Double.toString(aDevice.getMaxValue()));
                 currentValue.setText(Double.toString(aDevice.getDecimalValue()));
 
-                //TODO: should seekbar be used? values can't go under 0...
-                seekbar.setMax((int) aDevice.getMaxValue());
-                seekbar.setProgress((int) aDevice.getDecimalValue());
+                // The seekbar gets the max of the devices maximum + the range of negatives
+                // This arrangement allows for showing the full range of the actuator's values
+                seekbar.setMax((int) (aDevice.getMaxValue() + negativeRange));
+                seekbar.setProgress((int) (aDevice.getDecimalValue() - deviceActualMin));
 
                 //set the onseekbarchangelistener to update currentValue if seekbar is touched
                 seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -475,7 +490,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         double newValue = -9999;
 
         //check if the field is empty
-        if(!TextUtils.isEmpty(currentValue.getText().toString()))
+        if (!TextUtils.isEmpty(currentValue.getText().toString()))
             newValue = Double.parseDouble(currentValue.getText().toString());
 
 
@@ -499,6 +514,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         Log.d(TAG, "starting handleDecimalItemValueChange, disabling widgets...");
         //set widgets disabled, they will be enabled by UpdateThread
         setButton.setEnabled(false);
+        currentValue.setEnabled(false);
         seekbar.setEnabled(false);
 
         //request device to change into the new value
@@ -671,9 +687,11 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Log.d(TAG, "setting buttons enabled");
-                                aSwitch.setChecked(aDevice.getBinaryValue());
-                                aSwitch.setEnabled(true);
+                                if(aDevice.getType() == Device.Type.ACTUATOR) {
+                                    Log.d(TAG, "setting buttons enabled");
+                                    aSwitch.setChecked(aDevice.getBinaryValue());
+                                    aSwitch.setEnabled(true);
+                                }
                             }
                         });
 
@@ -691,11 +709,14 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Log.d(TAG, "new values received, setting widgets enabled");
-                                seekbar.setProgress((int) aDevice.getDecimalValue());
-                                seekbar.setEnabled(true);
-                                currentValue.setText(Double.toString(aDevice.getDecimalValue()));
-                                currentValue.setEnabled(true);
+                                if (aDevice.getType() == Device.Type.ACTUATOR) {
+                                    Log.d(TAG, "new values received, setting widgets enabled");
+                                    seekbar.setProgress((int) aDevice.getDecimalValue());
+                                    seekbar.setEnabled(true);
+                                    currentValue.setText(Double.toString(aDevice.getDecimalValue()));
+                                    currentValue.setEnabled(true);
+                                    setButton.setEnabled(true);
+                                }
                             }
                         });
 
@@ -724,11 +745,11 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                                             " resetting to old values",
                                             Toast.LENGTH_SHORT).show();
 
-                            if(aDevice.getValueType() == Device.ValueType.BINARY) {
+                            if(aDevice.getValueType() == Device.ValueType.BINARY ) {
                                 aSwitch.setEnabled(true);
                                 aSwitch.setChecked(aDevice.getBinaryValue());
                             }
-                            else{
+                            if(aDevice.getType() == Device.Type.ACTUATOR){
                                 seekbar.setProgress((int) aDevice.getDecimalValue());
                                 seekbar.setEnabled(true);
                                 currentValue.setText(Double.toString(aDevice.getDecimalValue()));
