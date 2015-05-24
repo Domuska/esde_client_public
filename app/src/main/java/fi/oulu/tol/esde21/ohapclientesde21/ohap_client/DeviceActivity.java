@@ -47,6 +47,10 @@ import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 
 public class DeviceActivity extends Activity implements SensorEventListener {
 
+    public static final String EXTRA_CENTRAL_UNIT_URL = "fi.oulu.tol.esde21.CENTRAL_UNIT_URL";
+    public static final String EXTRA_DEVICE_ID = "fi.oulu.tol.esde21.DEVICE_ID";
+
+
     Device aDevice;
     TextView deviceName;
     TextView deviceDescription;
@@ -61,21 +65,23 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
     Activity thisActivity;
 
+    private CentralUnitConnection centralUnit;
+    private URL centralUnitUrl;
+
+    private boolean oldDeviceBinaryValue;
+    private double oldDeviceDoubleValue;
+
     private SensorManager mSensorManager;
     private Sensor mSensorSignificant = null;
     private Sensor mAccelerometer = null;
     private TriggerEventListener mListener = new TriggerListener();
     SharedPreferences sharedPref;
 
-    // let's use a hard coded value for now, perhaps later on put
+    // tracks user interest in notifications, later save
     // the value into sharedPreferences?
     Boolean isTracked = true;
 
     private static final String TAG = "DeviceActivity";
-
-    public static final String EXTRA_CENTRAL_UNIT_URL = "fi.oulu.tol.esde21.CENTRAL_UNIT_URL";
-    public static final String EXTRA_DEVICE_ID = "fi.oulu.tol.esde21.DEVICE_ID";
-
 
     // variables related to usage of accelerometer sensor, credit to Sashen Govender at:
     // http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
@@ -84,11 +90,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
     private float last_x, last_y, last_z;
 
     //Can be used to modify sensitivity of accelerometer sensor
-    private static final int SHAKE_TRIGGER = 600;
-
-
-    CentralUnitConnection centralUnit;
-    URL centralUnitUrl;
+    private static final int SHAKE_TRIGGER = 900;
 
 
     @Override
@@ -100,6 +102,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
         sharedPref = PreferenceManager
                 .getDefaultSharedPreferences(this);
+
 
 
         try {
@@ -116,11 +119,8 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
 
 
-
-
         if(deviceId != 0) {
-            //get the item from the ItemListActivity's public list of items, cast it into Device.
-            //This might be a source of bugs, since here there are no checks if the item we get is an actual device or not
+            //get the item from the CentralUnit, cast it into Device.
             aDevice = (Device) centralUnit.getItemById(deviceId);
 
             deviceName = (TextView) findViewById(R.id.DeviceName);
@@ -194,12 +194,12 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                 seekbar.setEnabled(false);
                 currentValue.setEnabled(false);
                 aSwitch.setEnabled(false);
-                deviceType.setText("Sensor");
+                deviceType.setText(getResources().getString(R.string.DeviceTypeSensor));
                 setButton.setEnabled(false);
             }
             //set device type text actuator
             else
-                deviceType.setText("Actuator");
+                deviceType.setText(getResources().getString(R.string.DeviceTypeActuator));
 
 
             setTitle(aDevice.getName());
@@ -207,17 +207,17 @@ public class DeviceActivity extends Activity implements SensorEventListener {
             Container parentVariable = aDevice.getParent();
             String prefix_ = "";
 
-            Log.d(TAG, "Starting do-while loop");
-            Log.d(TAG, "Parent name: " + parentVariable.getName());
+
+            Log.d(TAG, "Direct parent name: " + parentVariable.getName());
             do {
 
                 prefix_ = parentVariable.getName() + "/" + prefix_;
                 parentVariable = parentVariable.getParent();
 
             } while (parentVariable != null);
+            Log.d(TAG, "device's path: " + prefix_);
 
             devicePath.setText(prefix_);
-
 
 
             // Registering the appropriate listener for the initial shaking detection sensor
@@ -250,6 +250,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
             Intent resultIntent = new Intent(this, DeviceActivity.class);
             resultIntent.putExtra(EXTRA_DEVICE_ID, deviceId);
+
 
 
             //requires API level 16
@@ -467,27 +468,73 @@ public class DeviceActivity extends Activity implements SensorEventListener {
     // change teh value of the actuator (device takes care of sending request to the server)
     public void onClickSetButton (View v){
 
-        double newValue = -1;
+        // let us presume that no actuators have value of -9999, since absolute zero point in
+        // celsius is a bit over -400 and hopefully no one's ceiling lamp has this kind of value
+        // either.
+        double newValue = -9999;
 
         //check if the field is empty
-        if(!TextUtils.isEmpty(currentValue.getText().toString())) {
+        if(!TextUtils.isEmpty(currentValue.getText().toString()))
             newValue = Double.parseDouble(currentValue.getText().toString());
-            aDevice.changeDecimalValue(newValue);
-        }
 
-        //if not, check if the value is valid and act accordingly
-        if (newValue >= aDevice.getMinValue() && newValue <= aDevice.getMaxValue())
-            seekbar.setProgress((int)newValue);
+
+        // if value is valid, send change request and disable widgets
+        // TODO: translate the range to be suitable for seekbar
+        if (newValue >= aDevice.getMinValue() && newValue <= aDevice.getMaxValue()) {
+
+            Log.d(TAG, "set button clicked, new value is valid: " + newValue +
+                    " going to handleDecimalItemValueChange(double newValue)");
+
+            handleDecimalItemValueChange(newValue);
+        }
+        else{
+            Toast.makeText(thisActivity, "Sorry, the value was not within" +
+                    " actuator's allowed values", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void handleDecimalItemValueChange(double newValue){
+
+        Log.d(TAG, "starting handleDecimalItemValueChange, disabling widgets...");
+        //set widgets disabled, they will be enabled by UpdateThread
+        setButton.setEnabled(false);
+        seekbar.setEnabled(false);
+
+        // save the old value of the device for the UpdateThread
+        oldDeviceDoubleValue = aDevice.getDecimalValue();
+
+        //request device to change into the new value
+        aDevice.changeDecimalValue(newValue);
+
+        //start a new thread to listen to changes to device's values
+        new UpdateThread().start();
 
     }
 
     // change device's (which will send an request for server) state
-    // NOTE: if device's ID is 2, the program will crash. No clue why!
     public void onBinaryButtonClicked (View v){
-        Log.d(TAG, "binary button clicked: " + aSwitch.isChecked());
-        boolean status = aSwitch.isChecked();
-        aDevice.changeBinaryValue(status);
+        Log.d(TAG, "binary button clicked: " + aSwitch.isChecked()+
+                " setting button disabled");
+
+        aSwitch.setEnabled(false);
+
+        // save the old value of the device for the UpdateThread
+        if(aSwitch.isChecked() == true)
+            oldDeviceBinaryValue = false;
+        else
+            oldDeviceBinaryValue = true;
+
+
+        //boolean status = aSwitch.isChecked();
+
+        aDevice.changeBinaryValue(aSwitch.isChecked());
+
+        //start a new thread to listen to changes to device's values
+        new UpdateThread().start();
     }
+
+
+
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
@@ -526,30 +573,36 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                     Random random = new Random();
 
                     if(aDevice.getValueType() == Device.ValueType.DECIMAL) {
-                        int newInt = random.nextInt(((int)aDevice.getMaxValue() - (int)aDevice.getMinValue() + 1) + (int)aDevice.getMinValue());
-                        aDevice.changeDecimalValue(newInt);
+                        double newDouble = random.nextInt(((int)aDevice.getMaxValue() - (int)aDevice.getMinValue() + 1) + (int)aDevice.getMinValue());
+                        aDevice.changeDecimalValue(newDouble);
 
                         Toast.makeText(thisActivity,
                                 getResources().getString(R.string.device_sensorToast)
-                                        + newInt,
+                                        + newDouble,
                                 Toast.LENGTH_SHORT).show();
 
-                        Log.d(TAG, "set random decimal value as " + newInt);
-                        seekbar.setProgress(newInt);
-                        currentValue.setText(Integer.toString(newInt));
+                        Log.d(TAG, "set random decimal value as " + newDouble);
+                        handleDecimalItemValueChange(newDouble);
+                        //seekbar.setProgress(newInt);
+                        //currentValue.setText(Integer.toString(newInt));
                     }
                     else{
                         boolean newBoolean = random.nextBoolean();
-                        aDevice.changeBinaryValue(newBoolean);
+                        //aDevice.changeBinaryValue(newBoolean);
 
-                        Toast.makeText(thisActivity,
-                                getResources().getString(R.string.device_sensorToast)
-                                        + newBoolean,
-                                Toast.LENGTH_SHORT).show();
+                        if(aSwitch.isEnabled()) {
+                            aSwitch.setChecked(newBoolean);
+                            onBinaryButtonClicked(null);
 
-                        Log.d(TAG, "set random binary value as " + newBoolean);
-                        aSwitch.setChecked(newBoolean);
+                            Toast.makeText(thisActivity,
+                                    getResources().getString(R.string.device_sensorToast)
+                                            + newBoolean,
+                                    Toast.LENGTH_SHORT).show();
 
+                            Log.d(TAG, "set random binary value as " + newBoolean);
+
+
+                        }
                     }
                 }
                 last_x = x;
@@ -568,36 +621,138 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         public void onTrigger(TriggerEvent e){
 
             if(aDevice.getValueType() == Device.ValueType.DECIMAL) {
-                int newInt = random.nextInt(((int)aDevice.getMaxValue() - (int)aDevice.getMinValue() + 1) + (int)aDevice.getMinValue());
-                aDevice.changeDecimalValue(newInt);
+                double newDouble = random.nextInt(((int) aDevice.getMaxValue() - (int) aDevice.getMinValue() + 1) + (int) aDevice.getMinValue());
+
+                aDevice.changeDecimalValue(newDouble);
 
                 Toast.makeText(thisActivity,
                                 getResources().getString(R.string.device_sensorToast)
-                                + newInt,
+                                + newDouble,
                                 Toast.LENGTH_SHORT).show();
 
-                Log.d(TAG, "set random decimal value as " + newInt);
-                seekbar.setProgress(newInt);
-                currentValue.setText(Integer.toString(newInt));
+                Log.d(TAG, "set random decimal value as " + newDouble);
+
+                handleDecimalItemValueChange(newDouble);
+                //seekbar.setProgress(newDouble);
+                //currentValue.setText(Integer.toString(newDouble));
             }
             else{
                 boolean newBoolean = random.nextBoolean();
-                aDevice.changeBinaryValue(newBoolean);
 
-                Toast.makeText(thisActivity,
-                                getResources().getString(R.string.device_sensorToast)
-                                + newBoolean,
-                                Toast.LENGTH_SHORT).show();
+                //aDevice.changeBinaryValue(newBoolean);
+                if(aSwitch.isEnabled()) {
+                    aSwitch.setChecked(newBoolean);
+                    onBinaryButtonClicked(null);
 
-                Log.d(TAG, "set random binary value as " + newBoolean);
-                aSwitch.setChecked(newBoolean);
+                    Toast.makeText(thisActivity,
+                            getResources().getString(R.string.device_sensorToast)
+                                    + newBoolean,
+                            Toast.LENGTH_SHORT).show();
+
+                    Log.d(TAG, "set random binary value as " + newBoolean);
+                }
 
             }
 
             // re-register trigger since significant motion sensor is fire-once only
             mSensorManager.requestTriggerSensor(this, mSensorSignificant);
         }
+    }
 
+    /**
+     * A thread meant to monitor if a value for the device is changed.
+     * This value can only be changed by the CentralUnitConnection when it receives
+     * a new value from the server.
+     * When a new value is noticed (by aDevice.getBinary/DecimalValue), the values
+     * in UI are changed and widgets are set back to enabled. If a new value is not
+     * received in 20 seconds, the thread will time out and set the old values to UI widgets
+     *
+     * Here we use the fact that device.changeDecimal/BinaryValue does not immediately
+     * change the value of the device, but just sends a request for the server to do so.
+     */
+    public class UpdateThread extends Thread{
 
+        boolean continueRunning = true;
+        int attempts = 0;
+
+        @Override
+        public void run() {
+
+            while(continueRunning){
+
+                // BINARY ACTUATOR
+                if(aDevice.getValueType() == Device.ValueType.BINARY){
+
+                    if(aDevice.getBinaryValue() != oldDeviceBinaryValue) {
+                        Log.d(TAG, "new values received from server: " + aDevice.getBinaryValue());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.d(TAG, "setting buttons enabled");
+                                aSwitch.setChecked(aDevice.getBinaryValue());
+                                aSwitch.setEnabled(true);
+                            }
+                        });
+
+                        continueRunning = false;
+                    }
+                }
+
+                // DECIMAL ACTUATOR
+                else{
+
+                    if(aDevice.getDecimalValue() != oldDeviceDoubleValue) {
+                        Log.d(TAG, "new values received from server: " + aDevice.getDecimalValue());
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.d(TAG, "new values received, setting widgets enabled");
+                                seekbar.setProgress((int) aDevice.getDecimalValue());
+                                seekbar.setEnabled(true);
+                                currentValue.setText(Double.toString(aDevice.getDecimalValue()));
+                                currentValue.setEnabled(true);
+                            }
+                        });
+
+                        continueRunning = false;
+                    }
+                }
+
+                try{
+                    sleep(500);
+                    attempts ++;
+                }
+                catch(InterruptedException ie){
+                    Log.d(TAG, "sleep interrupted: interruptedException " + ie.toString());
+                }
+
+                if(attempts > 41) {
+                    continueRunning = false;
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Log.d(TAG, "error, request timed out, new values not received from server");
+                            Toast.makeText(thisActivity, "Error, new values not received from the server" +
+                                            " resetting to old values",
+                                            Toast.LENGTH_SHORT).show();
+
+                            if(aDevice.getValueType() == Device.ValueType.BINARY) {
+                                aSwitch.setEnabled(true);
+                                aSwitch.setChecked(oldDeviceBinaryValue);
+                            }
+                            else{
+                                seekbar.setProgress((int) oldDeviceDoubleValue);
+                                seekbar.setEnabled(true);
+                                currentValue.setText(Double.toString(oldDeviceDoubleValue));
+                                setButton.setEnabled(true);
+                            }
+                        }
+                    });
+
+                }
+            }
+        }
     }
 }

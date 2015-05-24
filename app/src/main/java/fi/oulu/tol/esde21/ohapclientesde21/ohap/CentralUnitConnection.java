@@ -124,6 +124,7 @@ public class CentralUnitConnection extends CentralUnit{
 
         new HandlerThread().start();
 
+
     }
 
     private void stopNetworking(){
@@ -167,6 +168,7 @@ public class CentralUnitConnection extends CentralUnit{
                 .integer32(container.getId())
                 .writeTo(outputStream);
         Log.d(TAG, "stopListening stuff sent to germany");
+
     }
 
 
@@ -220,6 +222,7 @@ public class CentralUnitConnection extends CentralUnit{
     private class IncomingMessageHandler implements Runnable{
 
         IncomingMessage storedMessage;
+        Handler handler = new Handler(Looper.getMainLooper());
 
         //fields for all items
         long itemIdentifier;
@@ -380,6 +383,8 @@ public class CentralUnitConnection extends CentralUnit{
             }
 
         }
+
+
 
         /**
          * Method for getting data regarding decimal devices

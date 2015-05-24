@@ -13,7 +13,9 @@
     <string name="DeviceDescriptionHelpText">DESCRIPTION</string>
     <string name="DeviceTypeHelpText">DEVICE TYPE</string>
     <string name="DeviceTypeHint">Type of the device</string>
-    <string name="DeviceSetValue">SET</string>
+    <string name="DeviceSetValue">CHANGE</string>
+    <string name="DeviceTypeActuator">Actuator</string>
+    <string name="DeviceTypeSensor">Sensor</string>
     <string name="title_activity_item_list">ItemListActivity</string>
     <string name="action_enable_monitoring">Enable monitoring</string>
     <string name="action_disable_monitoring">Disable monitoring</string>
@@ -23,6 +25,7 @@
     <string name="device_sensorToSigMo">Sensor set to Significant Motion</string>
     <string name="device_sensorToAccel">Sensor set to Accelerometer</string>
     <string name="device_sensorToast">a new random value set for the device: </string>
+
 
     <!--entry_activity strings -->
     <string name="entryActivity_infoText">Hello! Welcome to OHAP smart-home remote device app thingy!</string>
