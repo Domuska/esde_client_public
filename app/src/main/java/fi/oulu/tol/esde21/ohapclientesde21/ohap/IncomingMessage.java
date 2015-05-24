@@ -94,7 +94,7 @@ public class IncomingMessage {
 
     public int integer16(){
 
-        //lue alta miten tämä toimii, sama idea
+        //lue alta miten tama toimii, sama idea
         int firstByte = getNextByte();
         int secondByte = getNextByte();
         int result = (firstByte << 8) + secondByte;
@@ -106,7 +106,7 @@ public class IncomingMessage {
 
     public int integer32(){
 
-        //haetaan neljään muuttujaan arvot bufferista kyseisistä positioneista
+        //haetaan neljaan muuttujaan arvot bufferista kyseisista positioneista
         int firstByte = getNextByte();
         int secondByte = getNextByte();
         int thirdByte = getNextByte();
@@ -120,9 +120,9 @@ public class IncomingMessage {
         String str = Integer.toString(firstByte) + secondByte + thirdByte + fourthByte;
         System.out.println(str);*/
 
-        // yhdistetään 4 muuttujaa (tavua) yheksi numeroksi, firstBytessä on isoimmat numerot
-        // joten ekana bittikuvaan ne, niitä siirretään vasemmalle 24 paikkaa, tämän
-        // jälkeen seuraavat 8 bittiä laitetaan bittikuvaan ja niitä siirretään 16 paikkaa
+        // yhdistetaan 4 muuttujaa (tavua) yheksi numeroksi, firstBytessa on isoimmat numerot
+        // joten ekana bittikuvaan ne, niita siirretan vasemmalle 24 paikkaa, taman
+        // jalkeen seuraavat 8 bittia laitetaan bittikuvaan ja niita siirretaan 16 paikkaa
         // vasemmalle jne
         return (firstByte << 24) + (secondByte << 16) + (thirdByte << 8) + fourthByte;
     }
@@ -142,10 +142,10 @@ public class IncomingMessage {
 
         long result = 0;
 
-        // samaan tapaan kuin yllä, tehdään aina bittikuvalle shiftaus vasemmalle 8 paikkaa
-        // ja lisätään 8 seuraavaa bittiä bittikarttaan. Tässä vain luodaan kerralla
-        // koko longi näin, eikä pistetä erikseen inttimuuttujiin jotka sitten lopuksi
-        // yhdistetään niinkuin yllä
+        // samaan tapaan kuin ylla, tehdaan aina bittikuvalle shiftaus vasemmalle 8 paikkaa
+        // ja lisataan 8 seuraavaa bittia bittikarttaan. Tassa vain luodaan kerralla
+        // koko longi nain, eika pisteta erikseen int-muuttujiin jotka sitten lopuksi
+        // yhdistetaan niinkuin ylla
         for(int i = 1; i  <= 8; i++){
 
             result = (result << 8) + getNextByte();

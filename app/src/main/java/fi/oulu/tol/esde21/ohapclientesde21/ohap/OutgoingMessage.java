@@ -46,7 +46,7 @@ public class OutgoingMessage {
         buffer = Arrays.copyOf(buffer, newLength);
     }
 
-    //TODO: lis‰t‰‰n ensureCapacity -kutsut jokapaikkaan
+    //TODO: lisataan ensureCapacity -kutsut jokapaikkaan
     public void writeTo(OutputStream os){
 
        // http://stackoverflow.com/questions/1936857/convert-integer-into-byte-array-java
@@ -120,8 +120,8 @@ public class OutgoingMessage {
 
         ensureCapacity(2);
 
-        // ekat 8 bitti‰ bufferiin, bittisiirros oikealle
-        // (puotetaan intin bittikuvajaisesta 8 vasemmanpuolisinta bitti‰)
+        // ekat 8 bittia bufferiin, bittisiirros oikealle
+        // (puotetaan intin bittikuvajaisesta 8 vasemmanpuolisinta bittia)
         buffer[position] = (byte) (i >> 8);
         position ++;
 
@@ -141,14 +141,14 @@ public class OutgoingMessage {
         Log.d(TAG, "integer32: " + i);
 
 
-        //jaetaan sis‰‰ntuleva intti nelj‰‰n palaan bittishiftauksella
+        //jaetaan sisaantuleva intti neljaan palaan bittishiftauksella
 
-        //siirret‰‰n i:n 25-32 bitit oikealle 24 paikkaa ja tallennetaan bufferiin
-        //huom, tehd‰‰‰n castaus byteksi numerolle myˆs (tietty kun tallennetaan bytebufferiin)
+        //siirretaan i:n 25-32 bitit oikealle 24 paikkaa ja tallennetaan bufferiin
+        //huom, tehdaan castaus byteksi numerolle myos (tietty kun tallennetaan bytebufferiin)
         buffer[position] = (byte) (i >> 24);
         position ++;
 
-        //siirret‰‰n 24-17 bitit oikealle 16 paikkaa ja tallennetaan bufferiin
+        //siirretaan 24-17 bitit oikealle 16 paikkaa ja tallennetaan bufferiin
         buffer[position] = (byte) (i >> 16);
         position++;
 
@@ -171,9 +171,9 @@ public class OutgoingMessage {
 
         long longValue = Double.doubleToLongBits(d);
 
-        // samaan tapaan kuin yll‰, joka kierroksella longista otetaan 8 bitti‰, siirret‰‰n
-        // ne bittikuvassa 8 ensimm‰iseksi bitiksi t‰m‰n j‰lkeen castataan numero byteksi
-        // eli otetaan siit‰ 8 ensimm‰ist‰ bitti‰ (jotka on juuri siihe siirretty), ja n‰m‰
+        // samaan tapaan kuin ylla, joka kierroksella longista otetaan 8 bittia, siirretaan
+        // ne bittikuvassa 8 ensimmaiseksi bitiksi taman jalkeen castataan numero byteksi
+        // eli otetaan siita 8 ensimmaista bittia (jotka on juuri siihe siirretty), ja nama
         // tallennetaan bufferiin.
 
         // help for solution gotten from:
