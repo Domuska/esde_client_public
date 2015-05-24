@@ -20,6 +20,8 @@
     <string name="action_set_sensor">Toggle Sensors</string>
     <string name="device_sensorEnable">Sensors enabled</string>
     <string name="device_sensorDisable">Sensors disabled</string>
+    <string name="device_sensorToSigMo">Sensor set to Significant Motion</string>
+    <string name="device_sensorToAccel">Sensor set to Accelerometer</string>
     <string name="device_sensorToast">a new random value set for the device: </string>
 
     <!--entry_activity strings -->
@@ -33,6 +35,7 @@
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="prefences_urlError">Sorry, entered URL was malformed, default URL restored</string>
     <string name="preferences_setSensor">Sensor status</string>
+    <string name="preferences_chooseSensor">Choose sensor</string>
     <string name="preferenceCategory_server">SERVER</string>
     <string name="preferenceCategory_loginInfo">LOGIN INFORMATION</string>
     <string name="preferenceCategory_sensors">DEVICES</string>
@@ -48,5 +51,6 @@
     <string name="pref_field_userName">pref_key_userName</string>
     <string name="pref_field_password">pref_key_password</string>
     <string name="pref_field_sensor">pref_key_sensor</string>
+    <string name="pref_field_sensorlist">pref_key_sensorlist</string>
 
 </resources>

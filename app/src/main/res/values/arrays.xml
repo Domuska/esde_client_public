@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_sensorlist_entries">
+        <item>None</item>
+        <item>Significant Motion Sensor (API 18+)</item>
+        <item>Accelerometer</item>
+    </string-array>
+
+    <string-array name="pref_sensorlist_entryvalues">
+        <item>None</item>
+        <item>Significant</item>
+        <item>Accelerometer</item>
+    </string-array>
+
+    <string-array name="empty_array"></string-array>
+</resources>

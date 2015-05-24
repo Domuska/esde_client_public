@@ -13,6 +13,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.TriggerEvent;
 import android.hardware.TriggerEventListener;
+import android.media.audiofx.BassBoost;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
@@ -62,6 +63,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
     private SensorManager mSensorManager;
     private Sensor mSensorSignificant = null;
+    private Sensor mAccelerometer = null;
     private TriggerEventListener mListener = new TriggerListener();
     SharedPreferences sharedPref;
 
@@ -74,6 +76,13 @@ public class DeviceActivity extends Activity implements SensorEventListener {
     public static final String EXTRA_CENTRAL_UNIT_URL = "fi.oulu.tol.esde21.CENTRAL_UNIT_URL";
     public static final String EXTRA_DEVICE_ID = "fi.oulu.tol.esde21.DEVICE_ID";
 
+
+    // variables related to usage of accelerometer sensor, credit to Sashen Govender at:
+    // http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
+
+    private long timeSinceLastUpdate = 0;
+    private float last_x, last_y, last_z;
+    private static final int SHAKE_TRIGGER = 600;
 
 
     CentralUnitConnection centralUnit;
@@ -101,7 +110,6 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         centralUnit = ConnectionManager.getInstance().getCentralUnit(centralUnitUrl);
         thisActivity = this;
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
 
 
 
@@ -206,21 +214,25 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
             } while (parentVariable != null);
 
-
             devicePath.setText(prefix_);
 
 
 
-
             // if user has set in setting sensor activity to be on, initialize sensor business
-            if(sharedPref.getBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, true)) {
+            if (sharedPref.getString("pref_key_sensorlist", "None").contentEquals("Significant")){   //contentEquals("Significant")) {
 
+                Log.d(TAG, "registering significant motion sensor");
                 // check if the current API level is enough for this sensor and that the device is an actuator
                 if (Build.VERSION.SDK_INT >= 18 && (aDevice.getType() == Device.Type.ACTUATOR))
                     mSensorSignificant = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
-
             }
 
+            else if(sharedPref.getString("pref_key_sensorlist", "None")
+                    .contentEquals("Accelerometer")){
+                Log.d(TAG, "registering accelerometer sensor");
+                mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+            }
 
 
 
@@ -284,8 +296,13 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
         // if mSensorSignificant is null, then API level is too low for Significant Motion Sensor
         if(mSensorSignificant != null){
+            Log.d(TAG, "re-registering sigmo sensor");
             mSensorManager.registerListener(this, mSensorSignificant, SensorManager.SENSOR_DELAY_NORMAL);
             mSensorManager.requestTriggerSensor(mListener, mSensorSignificant);
+        }
+        else if(mAccelerometer != null){
+            Log.d(TAG, "re-registering accelerometer sensor");
+            mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
     }
 
@@ -293,11 +310,22 @@ public class DeviceActivity extends Activity implements SensorEventListener {
     protected void onPause() {
         super.onPause();
 
-        // if mSensorSignificant is null, then API level is too low for Significant Motion Sensor
+        // if mSensorSignificant is null, then API level is too low for Significant Motion Sensor, or the chosen option is None or Accelerometer
         if(mSensorSignificant != null){
+            Log.d(TAG, "unregistering sigmo sensor");
             mSensorManager.unregisterListener(this);
             mSensorManager.cancelTriggerSensor(mListener, mSensorSignificant);
 
+        }
+        if(mSensorSignificant != null){
+            Log.d(TAG, "unregistering sigmo sensor");
+            mSensorManager.unregisterListener(this);
+            mSensorManager.cancelTriggerSensor(mListener, mSensorSignificant);
+
+        }
+        if(mAccelerometer != null){
+            Log.d(TAG, "unregistering accelerometer sensor");
+            mSensorManager.unregisterListener(this);
         }
 
     }
@@ -351,38 +379,81 @@ public class DeviceActivity extends Activity implements SensorEventListener {
             return true;
         }
         if(id == R.id.sensor_enable_disable){
-            // the button is a toggle, if current value is true set shared pref value to false and other way around
-            if(sharedPref.getBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, true)) {
-                editor.putBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, false);
-                Log.d(TAG, "setting shared pref value to false");
 
-                Toast.makeText(this, getResources().getString(R.string.device_sensorDisable),
+            // the button is a toggle, if current value is true set shared pref value to false and other way around
+            if(sharedPref.getString("pref_key_sensorlist", "None")
+                    .contentEquals("None")) {
+                editor.putString(SettingsFragment.KEY_LIST_SENSOR, "Significant");
+                Log.d(TAG, "setting sharedpref sensor value to sigmo");
+
+                Toast.makeText(this, getResources().getString(R.string.device_sensorToSigMo),
                                 Toast.LENGTH_SHORT).show();
 
-
                 if(mSensorSignificant != null){
-                    mSensorManager.unregisterListener(this);
-                    mSensorManager.cancelTriggerSensor(mListener, mSensorSignificant);
-
-                }
-
-                editor.commit();
-            }
-            else {
-                editor.putBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, true);
-                Log.d(TAG, "setting shared pref value to true");
-
-                Toast.makeText(this, getResources().getString(R.string.device_sensorEnable),
-                        Toast.LENGTH_SHORT).show();
-
-                if(mSensorSignificant != null){
+                    Log.d(TAG, "registering sigmo listener");
                     mSensorManager.registerListener(this, mSensorSignificant, SensorManager.SENSOR_DELAY_NORMAL);
                     mSensorManager.requestTriggerSensor(mListener, mSensorSignificant);
                 }
 
+//                if(mSensorSignificant != null){
+//                    mSensorManager.unregisterListener(this);
+//                    mSensorManager.cancelTriggerSensor(mListener, mSensorSignificant);
+//                }
+
                 editor.commit();
             }
 
+            else if(sharedPref.getString("pref_key_sensorlist", "None")
+                    .contentEquals("Significant")) {
+                editor.putString(SettingsFragment.KEY_LIST_SENSOR, "Accelerometer");
+                Log.d(TAG, "setting sharedpref sensor value to accelerometer");
+
+                Toast.makeText(this, getResources().getString(R.string.device_sensorToAccel),
+                        Toast.LENGTH_SHORT).show();
+
+                if(mSensorSignificant != null){
+                    Log.d(TAG, "unregistering sigmo listener and triggersensor");
+                    mSensorManager.unregisterListener(this);
+                    mSensorManager.cancelTriggerSensor(mListener, mSensorSignificant);
+                }
+
+                if(mAccelerometer != null){
+                    Log.d(TAG, "registering accelerometer listener");
+                    mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+                }
+
+                editor.commit();
+            }
+
+            else if(sharedPref.getString("pref_key_sensorlist", "None")
+                    .contentEquals("Accelerometer")) {
+                editor.putString(SettingsFragment.KEY_LIST_SENSOR, "None");
+                Log.d(TAG, "setting sharedpref sensor value to none");
+
+                Toast.makeText(this, getResources().getString(R.string.device_sensorDisable),
+                        Toast.LENGTH_SHORT).show();
+
+                if(mAccelerometer != null){
+                    Log.d(TAG, "unregistering accelerometer listener");
+                    mSensorManager.unregisterListener(this);
+                }
+                editor.commit();
+            }
+//            else {
+//                editor.putBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, true);
+//                Log.d(TAG, "setting shared pref value to true");
+//
+//                Toast.makeText(this, getResources().getString(R.string.device_sensorEnable),
+//                        Toast.LENGTH_SHORT).show();
+//
+//                if(mSensorSignificant != null){
+//                    mSensorManager.registerListener(this, mSensorSignificant, SensorManager.SENSOR_DELAY_NORMAL);
+//                    mSensorManager.requestTriggerSensor(mListener, mSensorSignificant);
+//                }
+//
+//                editor.commit();
+//            }
+//
             return true;
         }
 
@@ -396,7 +467,6 @@ public class DeviceActivity extends Activity implements SensorEventListener {
             return true;
 
         }
-
 
         return super.onOptionsItemSelected(item);
     }
@@ -432,8 +502,70 @@ public class DeviceActivity extends Activity implements SensorEventListener {
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
+    public void onSensorChanged(SensorEvent event)
+    {
+        //Credit for simple Accelerometer usage tutorial to Sashen Govender at:
+        // http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
 
+        Sensor sensor = event.sensor;
+
+        if(sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+        {
+            // Extracts current coordinates for device from sensor
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            long currentTime = System.currentTimeMillis();
+
+            if((currentTime - timeSinceLastUpdate) > 100)
+            {
+                long timeDifference = (currentTime - timeSinceLastUpdate);
+                timeSinceLastUpdate = currentTime;
+
+                float shake_speed = Math
+                        .abs(x + y + z - last_x - last_y - last_z)/ timeDifference * 10000;
+
+                if (shake_speed > SHAKE_TRIGGER){
+
+                    Log.d(TAG, "shaken, not stirred with accelerometer");
+                    //TODO: define what happens when shaked (random value for slider)
+
+                    Random random = new Random();
+
+                    if(aDevice.getValueType() == Device.ValueType.DECIMAL) {
+                        int newInt = random.nextInt(((int)aDevice.getMaxValue() - (int)aDevice.getMinValue() + 1) + (int)aDevice.getMinValue());
+                        aDevice.changeDecimalValue(newInt);
+
+                        Toast.makeText(thisActivity,
+                                getResources().getString(R.string.device_sensorToast)
+                                        + newInt,
+                                Toast.LENGTH_SHORT).show();
+
+                        Log.d(TAG, "set random decimal value as " + newInt);
+                        seekbar.setProgress(newInt);
+                        currentValue.setText(Integer.toString(newInt));
+                    }
+                    else{
+                        boolean newBoolean = random.nextBoolean();
+                        aDevice.changeBinaryValue(newBoolean);
+
+                        Toast.makeText(thisActivity,
+                                getResources().getString(R.string.device_sensorToast)
+                                        + newBoolean,
+                                Toast.LENGTH_SHORT).show();
+
+                        Log.d(TAG, "set random binary value as " + newBoolean);
+                        aSwitch.setChecked(newBoolean);
+
+                    }
+                }
+
+                last_x = x;
+                last_y = y;
+                last_z = z;
+            }
+        }
     }
 
     // inner class for the significant motion sensor

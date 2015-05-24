@@ -30,11 +30,17 @@
     <PreferenceCategory
         android:title="@string/preferenceCategory_sensors" >
 
-        <CheckBoxPreference
+<!--        <CheckBoxPreference
             android:key="@string/pref_field_sensor"
             android:title="@string/preferences_setSensor"
-            android:defaultValue="true" />
+            android:defaultValue="true" />-->
 
+        <ListPreference
+            android:key="@string/pref_field_sensorlist"
+            android:title="@string/preferences_chooseSensor"
+            android:entries="@array/pref_sensorlist_entries"
+            android:entryValues="@array/pref_sensorlist_entryvalues"
+            android:defaultValue="None" />
 
     </PreferenceCategory>
 </PreferenceScreen>
