@@ -13,6 +13,7 @@
         android:theme="@style/myTheme" >
         <activity
             android:name=".ohap_client.DeviceActivity"
+            android:screenOrientation="portrait"
             android:parentActivityName=".ohap_client.ItemListActivity" >
 
             <!-- Backwards compitability -->
