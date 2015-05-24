@@ -52,7 +52,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
     private static final String TAG = "DeviceActivity";
 
-    // max number of loops in thread, one loop = ~5000ms
+    // max number of loops in thread, one loop = ~5000ms, see sleep() in thread.
     final int MAX_THREAD_LOOPS = 3;
 
     Device aDevice;
@@ -71,6 +71,8 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
     int threadLoopAttempts = -1;
 
+    //for stopping the thread when activity pauses
+    volatile boolean activityStopping;
 
     private CentralUnitConnection centralUnit;
     private URL centralUnitUrl;
@@ -121,199 +123,205 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
 
+        //get the item from the CentralUnit, cast it into Device.
+        aDevice = (Device) centralUnit.getItemById(deviceId);
+
+        deviceName = (TextView) findViewById(R.id.DeviceName);
+        deviceName.setText(aDevice.getName());
+
+        deviceDescription = (TextView) findViewById(R.id.DeviceDescription);
+        deviceDescription.setText(aDevice.getDescription());
+
+        devicePath = (TextView) findViewById(R.id.DeviceHierarchyPath);
+
+        seekbar = (SeekBar) findViewById(R.id.DeviceStatus_decimal);
+        aSwitch = (Switch) findViewById(R.id.DeviceStatus_binary);
+        currentValue = (EditText) findViewById(R.id.editText_currentValue);
+        deviceMinValue = (TextView) findViewById(R.id.text_minvalue);
+        deviceMaxValue = (TextView) findViewById(R.id.text_maxvalue);
+        setButton = (Button) findViewById(R.id.currentValue_setButton);
+        deviceType = (TextView) findViewById(R.id.DeviceType);
 
 
-        if(deviceId != 0) {
-            //get the item from the CentralUnit, cast it into Device.
-            aDevice = (Device) centralUnit.getItemById(deviceId);
+        //if device is binary, hide UI elements related to decimal devices
+        if (aDevice.getValueType() == Device.ValueType.BINARY) {
+            seekbar.setVisibility(View.GONE);
+            deviceMinValue.setVisibility(View.GONE);
+            deviceMaxValue.setVisibility(View.GONE);
+            currentValue.setVisibility(View.GONE);
+            setButton.setVisibility(View.GONE);
 
-            deviceName = (TextView) findViewById(R.id.DeviceName);
-            deviceName.setText(aDevice.getName());
+            //set switch status based on device's status
+            aSwitch.setChecked(aDevice.getBinaryValue());
 
-            deviceDescription = (TextView) findViewById(R.id.DeviceDescription);
-            deviceDescription.setText(aDevice.getDescription());
+        }
+        //if device isn't binary it is decimal so hide binary device UI elements and set values
+        //for decimal device
+        else {
+            aSwitch.setVisibility(View.GONE);
 
-            devicePath = (TextView) findViewById(R.id.DeviceHierarchyPath);
+            // forced to resort to some mathematics in order to pretend the seekbar has a minimum value of less than 0
+            // negativeRange contains the absolute value of how far into the negatives the actuator can go, initially 0.0
+            // deviceActualMin says what the actual minimum and negative value is, if there is one
 
-            seekbar = (SeekBar) findViewById(R.id.DeviceStatus_decimal);
-            aSwitch = (Switch) findViewById(R.id.DeviceStatus_binary);
-            currentValue = (EditText) findViewById(R.id.editText_currentValue);
-            deviceMinValue = (TextView) findViewById(R.id.text_minvalue);
-            deviceMaxValue = (TextView) findViewById(R.id.text_maxvalue);
-            setButton = (Button) findViewById(R.id.currentValue_setButton);
-            deviceType = (TextView) findViewById(R.id.DeviceType);
+            Double negativeRange = 0.0;
+            Double deviceActualMin = 0.0;
 
-
-            //if device is binary, hide UI elements related to decimal devices
-            if (aDevice.getValueType() == Device.ValueType.BINARY) {
-                seekbar.setVisibility(View.GONE);
-                deviceMinValue.setVisibility(View.GONE);
-                deviceMaxValue.setVisibility(View.GONE);
-                currentValue.setVisibility(View.GONE);
-                setButton.setVisibility(View.GONE);
-
-                //set switch status based on device's status
-                aSwitch.setChecked(aDevice.getBinaryValue());
-
+            // this if-block makes the necessary calculations if the actuator has any negatives
+            if(aDevice.getMinValue() < 0)
+            {
+                negativeRange = Math.abs(aDevice.getMinValue());
+                deviceActualMin = (0 - negativeRange);
             }
-            //if device isn't binary it is decimal so hide binary device UI elements and set values
-            //for decimal device
-            else {
-                aSwitch.setVisibility(View.GONE);
 
-                // forced to resort to some mathematics in order to pretend the seekbar has a minimum value of less than 0
-                // negativeRange contains the absolute value of how far into the negatives the actuator can go, initially 0.0
-                // deviceActualMin says what the actual minimum and negative value is, if there is one
+            deviceMinValue.setText(Double.toString(deviceActualMin));
+            deviceMaxValue.setText(Double.toString(aDevice.getMaxValue()));
+            currentValue.setText(Double.toString(aDevice.getDecimalValue()));
 
-                Double negativeRange = 0.0;
-                Double deviceActualMin = 0.0;
+            // The seekbar gets the max of the devices maximum + the range of negatives
+            // This arrangement allows for showing the full range of the actuator's values
+            seekbar.setMax((int) (aDevice.getMaxValue() + negativeRange));
+            seekbar.setProgress((int) (aDevice.getDecimalValue() - deviceActualMin));
 
-                // this if-block makes the necessary calculations if the actuator has any negatives
-                if(aDevice.getMinValue() < 0)
-                {
-                    negativeRange = Math.abs(aDevice.getMinValue());
-                    deviceActualMin = (0 - negativeRange);
+            //set the onseekbarchangelistener to update currentValue if seekbar is touched
+            seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                double newProgress = 0;
+
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    newProgress = progress;
                 }
 
-                deviceMinValue.setText(Double.toString(deviceActualMin));
-                deviceMaxValue.setText(Double.toString(aDevice.getMaxValue()));
-                currentValue.setText(Double.toString(aDevice.getDecimalValue()));
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                    //nothing to do here...
+                }
 
-                // The seekbar gets the max of the devices maximum + the range of negatives
-                // This arrangement allows for showing the full range of the actuator's values
-                seekbar.setMax((int) (aDevice.getMaxValue() + negativeRange));
-                seekbar.setProgress((int) (aDevice.getDecimalValue() - deviceActualMin));
+                //when user changes value of seekbar, update the editText value
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
 
-                //set the onseekbarchangelistener to update currentValue if seekbar is touched
-                seekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    currentValue.setText(Double.toString(newProgress));
+                }
+            });
+        }
 
-                    double newProgress = 0;
-
-                    @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                        newProgress = progress;
-                    }
-
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar) {
-                        //nothing to do here...
-                    }
-
-                    //when user changes value of seekbar, update the editText value
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar) {
-
-                        currentValue.setText(Double.toString(newProgress));
-                    }
-                });
-            }
-
-            //if device is a sensor, set switch and seekbar disabled
-            if (aDevice.getType() == Device.Type.SENSOR) {
-                seekbar.setEnabled(false);
-                currentValue.setEnabled(false);
-                aSwitch.setEnabled(false);
-                deviceType.setText(getResources().getString(R.string.DeviceTypeSensor));
-                setButton.setEnabled(false);
-            }
-            //set device type text actuator
-            else
-                deviceType.setText(getResources().getString(R.string.DeviceTypeActuator));
+        //if device is a sensor, set switch and seekbar disabled
+        if (aDevice.getType() == Device.Type.SENSOR) {
+            seekbar.setEnabled(false);
+            currentValue.setEnabled(false);
+            aSwitch.setEnabled(false);
+            deviceType.setText(getResources().getString(R.string.DeviceTypeSensor));
+            setButton.setEnabled(false);
+        }
+        //set device type text actuator
+        else
+            deviceType.setText(getResources().getString(R.string.DeviceTypeActuator));
 
 
-            setTitle(aDevice.getName());
+        setTitle(aDevice.getName());
 
-            Container parentVariable = aDevice.getParent();
-            String prefix_ = "";
-
-
-            Log.d(TAG, "Direct parent name: " + parentVariable.getName());
-            do {
-
-                prefix_ = parentVariable.getName() + "/" + prefix_;
-                parentVariable = parentVariable.getParent();
-
-            } while (parentVariable != null);
-            Log.d(TAG, "device's path: " + prefix_);
-
-            devicePath.setText(prefix_);
+        Container parentVariable = aDevice.getParent();
+        String prefix_ = "";
 
 
-            // Registering the appropriate listener for the initial shaking detection sensor
+        Log.d(TAG, "Direct parent name: " + parentVariable.getName());
+        do {
 
-            if (sharedPref.getString("pref_key_sensorlist", "None").contentEquals("Significant")){
+            prefix_ = parentVariable.getName() + "/" + prefix_;
+            parentVariable = parentVariable.getParent();
 
-                Log.d(TAG, "registering significant motion sensor");
-                // check if the current API level is enough for this sensor and that the device is an actuator
-                if (Build.VERSION.SDK_INT >= 18 && (aDevice.getType() == Device.Type.ACTUATOR))
-                    mSensorSignificant = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
-            }
+        } while (parentVariable != null);
+        Log.d(TAG, "device's path: " + prefix_);
 
-            else if(sharedPref.getString("pref_key_sensorlist", "None")
-                    .contentEquals("Accelerometer")){
-                Log.d(TAG, "registering accelerometer sensor");
-                mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-                mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-            }
+        devicePath.setText(prefix_);
+
+
+        // Registering the appropriate listener for the initial shaking detection sensor
+
+        if (sharedPref.getString("pref_key_sensorlist", "None").contentEquals("Significant")){
+
+            Log.d(TAG, "registering significant motion sensor");
+            // check if the current API level is enough for this sensor and that the device is an actuator
+            if (Build.VERSION.SDK_INT >= 18 && (aDevice.getType() == Device.Type.ACTUATOR))
+                mSensorSignificant = mSensorManager.getDefaultSensor(Sensor.TYPE_SIGNIFICANT_MOTION);
+        }
+
+        else if(sharedPref.getString("pref_key_sensorlist", "None")
+                .contentEquals("Accelerometer")){
+            Log.d(TAG, "registering accelerometer sensor");
+            mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        }
 
 
 
-            // create a notification to be fired when the activity is created (this will change later to actually respond to changes in the actual device)
-            // http://developer.android.com/guide/topics/ui/notifiers/notifications.html#CreateNotification
+        // create a notification to be fired when the activity is created (this will change later to actually respond to changes in the actual device)
+        // http://developer.android.com/guide/topics/ui/notifiers/notifications.html#CreateNotification
 
-            final NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(this).
-                            setSmallIcon(R.drawable.ic_system_update_white_24dp).
-                            setContentTitle(aDevice.getName()).
-                            setContentText("Something happened to this device...");
+        final NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this).
+                        setSmallIcon(R.drawable.ic_system_update_white_24dp).
+                        setContentTitle(aDevice.getName()).
+                        setContentText("Something happened to this device...");
 
-            Intent resultIntent = new Intent(this, DeviceActivity.class);
-            resultIntent.putExtra(EXTRA_DEVICE_ID, deviceId);
-            Log.d(TAG, "putting CU url extra into intent: " + centralUnitUrl);
-            resultIntent.putExtra(EXTRA_CENTRAL_UNIT_URL, centralUnitUrl);
+        Intent resultIntent = new Intent(this, DeviceActivity.class);
+        Log.d(TAG, "putting CU url extra into intent: " + centralUnitUrl);
+        resultIntent.putExtra(EXTRA_CENTRAL_UNIT_URL, centralUnitUrl.toString());
+        resultIntent.putExtra(EXTRA_DEVICE_ID, deviceId);
 
+
+
+        if(Build.VERSION.SDK_INT > 15) {
 
             //requires API level 16
 
+            //create a virtual back stack for the intent
             TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 
             stackBuilder.addParentStack(DeviceActivity.class);
             stackBuilder.addNextIntent(resultIntent);
 
+            //add extras for the ItemList intent so that it will have the URL aswell
+            stackBuilder.editIntentAt(1).putExtra(ItemListActivity.EXTRA_CENTRAL_UNIT_URL, centralUnitUrl.toString());
+            stackBuilder.editIntentAt(1).putExtra(ItemListActivity.EXTRA_CONTAINER_ID, aDevice.getParent().getId());
+
             PendingIntent resultPendingIntent =
                     stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
             mBuilder.setContentIntent(resultPendingIntent);
-
-
-            final NotificationManager mNotificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            //mNotificationManager.notify(1, mBuilder.build());
-
-
-            if (isTracked == true) {
-                new CountDownTimer(10000, 1000) {
-
-
-                    @Override
-                    public void onFinish() {
-                        mNotificationManager.notify(1, mBuilder.build());
-                    }
-
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-                        //do nothing
-                    }
-                }.start();
-            }
-
         }
+
         else{
-            Log.d(TAG, "no ID for the device was found");
-            Toast.makeText(this, "Sorry, something went wrong...", Toast.LENGTH_LONG);
+            PendingIntent resultPendingIntent =
+                    PendingIntent.getActivity(thisActivity, 0, resultIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            mBuilder.setContentIntent(resultPendingIntent);
         }
 
-        new UpdateThread().start();
+
+        final NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (isTracked == true) {
+            new CountDownTimer(10000, 1000) {
+
+
+                @Override
+                public void onFinish() {
+                    mNotificationManager.notify(1, mBuilder.build());
+                }
+
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    //do nothing
+                }
+            }.start();
+        }
+
+
+
 
     }
 
@@ -332,6 +340,10 @@ public class DeviceActivity extends Activity implements SensorEventListener {
             Log.d(TAG, "re-registering accelerometer sensor");
             mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         }
+
+        //start the thread to listen to changes to the device
+        activityStopping = false;
+        new UpdateThread().start();
     }
 
     @Override
@@ -355,6 +367,9 @@ public class DeviceActivity extends Activity implements SensorEventListener {
             Log.d(TAG, "unregistering accelerometer sensor");
             mSensorManager.unregisterListener(this);
         }
+
+        //stop the thread
+        activityStopping = true;
 
     }
 
@@ -622,7 +637,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         }
     }
 
-    // inner class for the significant motion sensor
+    // inner class for the significant motion sensor, never registered unless API level is high enough
     class TriggerListener extends TriggerEventListener{
 
         Random random = new Random();
@@ -678,13 +693,13 @@ public class DeviceActivity extends Activity implements SensorEventListener {
      */
     public class UpdateThread extends Thread{
 
-        int attempts = 0;
+
 
         @Override
         public void run() {
 
 
-            while(true){
+            while(!activityStopping){
 
                 Log.d(TAG, "starting new round in loop...");
 
