@@ -52,6 +52,9 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
     private static final String TAG = "DeviceActivity";
 
+    // max number of loops in thread, one loop = ~5000ms
+    final int MAX_THREAD_LOOPS = 3;
+
     Device aDevice;
     TextView deviceName;
     TextView deviceDescription;
@@ -65,6 +68,9 @@ public class DeviceActivity extends Activity implements SensorEventListener {
     Button setButton;
 
     Activity thisActivity;
+
+    int threadLoopAttempts = -1;
+
 
     private CentralUnitConnection centralUnit;
     private URL centralUnitUrl;
@@ -495,7 +501,6 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
 
         // if value is valid, send change request and disable widgets
-        // TODO: translate the range to be suitable for seekbar
         if (newValue >= aDevice.getMinValue() && newValue <= aDevice.getMaxValue()) {
 
             Log.d(TAG, "set button clicked, new value is valid: " + newValue +
@@ -509,13 +514,16 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         }
     }
 
-    private void handleDecimalItemValueChange(double newValue){
+    private void handleDecimalItemValueChange(double newValue) {
 
         Log.d(TAG, "starting handleDecimalItemValueChange, disabling widgets...");
         //set widgets disabled, they will be enabled by UpdateThread
         setButton.setEnabled(false);
         currentValue.setEnabled(false);
         seekbar.setEnabled(false);
+
+        //when user requests a change to be made, we start a "counter" for the thread
+        threadLoopAttempts = MAX_THREAD_LOOPS;
 
         //request device to change into the new value
         aDevice.changeDecimalValue(newValue);
@@ -528,6 +536,9 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                 " setting button disabled");
 
         aSwitch.setEnabled(false);
+
+        //when user requests a change to be made, we start a "counter" for the thread
+        threadLoopAttempts = MAX_THREAD_LOOPS;
 
         aDevice.changeBinaryValue(aSwitch.isChecked());
 
@@ -680,16 +691,36 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                 // BINARY ACTUATOR
                 if(aDevice.getValueType() == Device.ValueType.BINARY){
 
-                    if(aDevice.getBinaryValue() == aSwitch.isChecked()){
 
-                        attempts = 0;
-                        Log.d(TAG, "new values received from server: " + aDevice.getBinaryValue());
+                    if(aDevice.getBinaryValue() != aSwitch.isChecked()){
+
+                        // if threadLoopAttempts is < 0, we are not waiting a message from the server.
+                        // if it is over 0, user has asked for a value to be changed and we're still
+                        // waiting for server response. Otherwise the server has sent a new value
+                        // and we should update the UI to represent that
+                        if(threadLoopAttempts < 0) {
+                            Log.d(TAG, "different values in UI than in actual device, switching values");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    aSwitch.setChecked(aDevice.getBinaryValue());
+                                }
+                            });
+                        }
+                    }
+                    else{
+
+                        //if the value in UI is the same as in the actual device in memory,
+                        //we know that we have received a message to change the device into
+                        //a the value that we have in UI, so we end the "timer".
+                        threadLoopAttempts = -1;
+
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 if(aDevice.getType() == Device.Type.ACTUATOR) {
                                     Log.d(TAG, "setting buttons enabled");
-                                    aSwitch.setChecked(aDevice.getBinaryValue());
+                                    //aSwitch.setChecked(aDevice.getBinaryValue());
                                     aSwitch.setEnabled(true);
                                 }
                             }
@@ -698,22 +729,42 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                     }
                 }
 
+
                 // DECIMAL ACTUATOR
                 else{
 
-                    if(aDevice.getDecimalValue() == Double.parseDouble(currentValue.getText().toString())){
+                    if(aDevice.getDecimalValue() != Double.parseDouble(currentValue.getText().toString())){
 
-                        attempts = 0;
+                        // if threadLoopAttempts is < 0, we are not waiting a message from the server.
+                        // if it is over 0, user has asked for a value to be changed and we're still
+                        // waiting for server response. Otherwise the server has sent a new value
+                        // and we should update the UI to represent that
+                        if(threadLoopAttempts < 0) {
+                            Log.d(TAG, "different values in UI than in actual device, switching values");
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    seekbar.setProgress((int) aDevice.getDecimalValue());
+                                    currentValue.setText(Double.toString(aDevice.getDecimalValue()));
+                                }
+                            });
+                        }
+                    }
+                    else{
+
+                        //if the value in UI is the same as in the actual device in memory,
+                        //we know that we have received a message to change the device into
+                        //a the value that we have in UI, so we end the "timer".
+                        threadLoopAttempts = -1;
                         Log.d(TAG, "new values received from server: " + aDevice.getDecimalValue());
 
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 if (aDevice.getType() == Device.Type.ACTUATOR) {
-                                    Log.d(TAG, "new values received, setting widgets enabled");
-                                    seekbar.setProgress((int) aDevice.getDecimalValue());
+                                    Log.d(TAG, "setting widgets enabled");
+
                                     seekbar.setEnabled(true);
-                                    currentValue.setText(Double.toString(aDevice.getDecimalValue()));
                                     currentValue.setEnabled(true);
                                     setButton.setEnabled(true);
                                 }
@@ -725,7 +776,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
                 try{
                     sleep(5000);
-                    attempts ++;
+                    threadLoopAttempts --;
                     Log.d(TAG, "sleeping for 5 seconds...");
                 }
                 catch(InterruptedException ie){
@@ -733,9 +784,8 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                 }
 
 
-                if(attempts > 3){
-                    attempts = 0;
-
+                if(threadLoopAttempts == 0){
+                    threadLoopAttempts = -1;
 
                     runOnUiThread(new Runnable() {
                         @Override
@@ -745,11 +795,15 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                                             " resetting to old values",
                                             Toast.LENGTH_SHORT).show();
 
-                            if(aDevice.getValueType() == Device.ValueType.BINARY ) {
+                            if( (aDevice.getValueType() == Device.ValueType.BINARY )
+                                    && (aDevice.getType() == Device.Type.ACTUATOR) ) {
+
                                 aSwitch.setEnabled(true);
                                 aSwitch.setChecked(aDevice.getBinaryValue());
                             }
-                            if(aDevice.getType() == Device.Type.ACTUATOR){
+                            if((aDevice.getValueType() == Device.ValueType.DECIMAL)
+                                    && (aDevice.getType() == Device.Type.ACTUATOR) ){
+
                                 seekbar.setProgress((int) aDevice.getDecimalValue());
                                 seekbar.setEnabled(true);
                                 currentValue.setText(Double.toString(aDevice.getDecimalValue()));
