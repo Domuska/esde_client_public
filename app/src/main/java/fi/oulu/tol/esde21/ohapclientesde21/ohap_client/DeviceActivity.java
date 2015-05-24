@@ -82,6 +82,8 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
     private long timeSinceLastUpdate = 0;
     private float last_x, last_y, last_z;
+
+    //Can be used to modify sensitivity of accelerometer sensor
     private static final int SHAKE_TRIGGER = 600;
 
 
@@ -218,8 +220,9 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
 
 
-            // if user has set in setting sensor activity to be on, initialize sensor business
-            if (sharedPref.getString("pref_key_sensorlist", "None").contentEquals("Significant")){   //contentEquals("Significant")) {
+            // Registering the appropriate listener for the initial shaking detection sensor
+
+            if (sharedPref.getString("pref_key_sensorlist", "None").contentEquals("Significant")){
 
                 Log.d(TAG, "registering significant motion sensor");
                 // check if the current API level is enough for this sensor and that the device is an actuator
@@ -238,6 +241,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
             // create a notification to be fired when the activity is created (this will change later to actually respond to changes in the actual device)
             // http://developer.android.com/guide/topics/ui/notifiers/notifications.html#CreateNotification
+
             final NotificationCompat.Builder mBuilder =
                     new NotificationCompat.Builder(this).
                             setSmallIcon(R.drawable.ic_system_update_white_24dp).
@@ -295,6 +299,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         super.onResume();
 
         // if mSensorSignificant is null, then API level is too low for Significant Motion Sensor
+
         if(mSensorSignificant != null){
             Log.d(TAG, "re-registering sigmo sensor");
             mSensorManager.registerListener(this, mSensorSignificant, SensorManager.SENSOR_DELAY_NORMAL);
@@ -380,7 +385,10 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         }
         if(id == R.id.sensor_enable_disable){
 
-            // the button is a toggle, if current value is true set shared pref value to false and other way around
+            // the button acts as a switch between the three modes of Sensors being set to Off,
+            // Significant Motion or Accelerometer when tapped. Notifications are shown and
+            // preferences changed accordingly
+
             if(sharedPref.getString("pref_key_sensorlist", "None")
                     .contentEquals("None")) {
                 editor.putString(SettingsFragment.KEY_LIST_SENSOR, "Significant");
@@ -439,21 +447,6 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                 }
                 editor.commit();
             }
-//            else {
-//                editor.putBoolean(SettingsFragment.KEY_CHECKBOX_SENSOR, true);
-//                Log.d(TAG, "setting shared pref value to true");
-//
-//                Toast.makeText(this, getResources().getString(R.string.device_sensorEnable),
-//                        Toast.LENGTH_SHORT).show();
-//
-//                if(mSensorSignificant != null){
-//                    mSensorManager.registerListener(this, mSensorSignificant, SensorManager.SENSOR_DELAY_NORMAL);
-//                    mSensorManager.requestTriggerSensor(mListener, mSensorSignificant);
-//                }
-//
-//                editor.commit();
-//            }
-//
             return true;
         }
 
@@ -504,7 +497,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event)
     {
-        //Credit for simple Accelerometer usage tutorial to Sashen Govender at:
+        // Credit for Accelerometer usage tutorial to Sashen Govender at:
         // http://code.tutsplus.com/tutorials/using-the-accelerometer-on-android--mobile-22125
 
         Sensor sensor = event.sensor;
@@ -529,7 +522,6 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                 if (shake_speed > SHAKE_TRIGGER){
 
                     Log.d(TAG, "shaken, not stirred with accelerometer");
-                    //TODO: define what happens when shaked (random value for slider)
 
                     Random random = new Random();
 
@@ -560,7 +552,6 @@ public class DeviceActivity extends Activity implements SensorEventListener {
 
                     }
                 }
-
                 last_x = x;
                 last_y = y;
                 last_z = z;

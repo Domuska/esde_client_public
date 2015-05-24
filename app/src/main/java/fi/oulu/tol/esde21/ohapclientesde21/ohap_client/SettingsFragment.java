@@ -21,7 +21,6 @@ public class SettingsFragment extends PreferenceFragment
     public static final String KEY_EDIT_TEXT_PREFERENCE = "pref_key_URL";
     public static final String KEY_EDIT_TEXT_USERNAME = "pref_key_userName";
     public static final String KEY_EDIT_TEXT_PASSWORD = "pref_key_password";
-//    public static final String KEY_CHECKBOX_SENSOR = "pref_key_sensor";
     public static final String KEY_LIST_SENSOR = "pref_key_sensorlist";
 
     private final String TAG = "SettingsFragment";
@@ -102,7 +101,6 @@ public class SettingsFragment extends PreferenceFragment
 
         Preference preference = findPreference(key);
 
-        
         if(preference instanceof  EditTextPreference) {
             EditTextPreference editTextPreference = (EditTextPreference) findPreference(key);
 
