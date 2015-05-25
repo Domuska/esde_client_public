@@ -272,7 +272,6 @@ public class DeviceActivity extends Activity implements SensorEventListener {
         resultIntent.putExtra(EXTRA_DEVICE_ID, deviceId);
 
 
-
         if(Build.VERSION.SDK_INT > 15) {
 
             //requires API level 16
@@ -748,7 +747,8 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                 // DECIMAL ACTUATOR
                 else{
 
-                    if(aDevice.getDecimalValue() != Double.parseDouble(currentValue.getText().toString())){
+                    if(aDevice.getDecimalValue() != Double.parseDouble(currentValue.getText().toString().trim())){
+
 
                         // if threadLoopAttempts is < 0, we are not waiting a message from the server.
                         // if it is over 0, user has asked for a value to be changed and we're still
@@ -771,14 +771,12 @@ public class DeviceActivity extends Activity implements SensorEventListener {
                         //we know that we have received a message to change the device into
                         //a the value that we have in UI, so we end the "timer".
                         threadLoopAttempts = -1;
-                        Log.d(TAG, "new values received from server: " + aDevice.getDecimalValue());
 
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 if (aDevice.getType() == Device.Type.ACTUATOR) {
                                     Log.d(TAG, "setting widgets enabled");
-
                                     seekbar.setEnabled(true);
                                     currentValue.setEnabled(true);
                                     setButton.setEnabled(true);
