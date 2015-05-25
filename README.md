@@ -5,7 +5,7 @@ Juhana Pikkarainen, 1957819, juhana.pikkarainen@gmail.com
 
 Build instructions:
 
-There are errors reported in DeviceActivity about too low minimum API levels, but these shouldn't be a problem, the code should compile and function properly anyway.
+There are errors reported in DeviceActivity about too low minimum API levels, but these shouldn't be a problem, the code should compile and function properly anyway. 
 
 Source files are in 3 folders, opimobi_ohap_files includes files gotten from Henrik at the start of the course, ohap folder includes classes related to central units and network communication and ohap_client has classes related directly to activities in the application.
 
@@ -32,9 +32,11 @@ Tomi implemented the user interface of the application excluding the Settings ac
 
 Juhana implemented the Settings activity and fragments, initial Preference-saving functionalities, and alongside Tomi added shaking detection to the application and added togglable shaking sensor modes.
 
+Both participated in bug-squishing and fine-tuning the app in general.
+
 Results of testing:
 
-Data is received and shown in the UI of the application. Changing login information in the shared preferences will result in failure to log in into the server (shown by log messages and the lack of elements appearing into the UI).
+Data is received and shown in the UI of the application. Changing login information in the shared preferences will result in failure to log in into the server (shown by log messages and the lack of elements appearing into the UI). During final tests, it became apparent the server provided access even with wrong login credentials. This is considered to be more the server's fault than the application's.
 
 Changing a a value in the DeviceActivity, moving out of the activity and re-returning into it seems to change the value of the device. Log messages also confirm that a new message arrives from the server after being sent from the DeviceActivity widgets.
 
@@ -47,4 +49,3 @@ Listing a big amount of devices and containers in the ItemList was tested and se
 After electing not to receive notifications from particular actuator changes, the app still shows them for the reasons described above, these settings are not saved in any sensible place. A notification will always be received after 10 seconds of entering a DeviceActivity
 
 Significant Motion sensor seems to be slightly more finicky about detecting shaking than the Accelerometer mode.
-
