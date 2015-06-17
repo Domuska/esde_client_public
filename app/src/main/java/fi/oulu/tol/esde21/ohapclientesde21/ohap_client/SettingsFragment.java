@@ -6,12 +6,17 @@ import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 import android.util.Log;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 
@@ -25,6 +30,9 @@ public class SettingsFragment extends PreferenceFragment
 
     private final String TAG = "SettingsFragment";
 
+    private PreferenceScreen preferenceScreen;
+    private int serverNumber = 2;
+
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -35,8 +43,8 @@ public class SettingsFragment extends PreferenceFragment
 
         addPreferencesFromResource(R.xml.preferences);
 
-        //Context context = getActivity();
-        //SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(context);
+        preferenceScreen = getPreferenceManager().createPreferenceScreen(getActivity());
+
 
         //set summary for the user name preference
         EditTextPreference userNamePreference = (EditTextPreference)findPreference(KEY_EDIT_TEXT_USERNAME);
@@ -45,31 +53,7 @@ public class SettingsFragment extends PreferenceFragment
         EditTextPreference urlPreference = (EditTextPreference)findPreference(KEY_EDIT_TEXT_PREFERENCE);
 
         //set listener to check if the entered string is a valid URL
-        urlPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue) {
-
-                boolean isSuccessful = false;
-                EditTextPreference pref = (EditTextPreference) preference;
-                String urlString = (String)newValue;
-
-                //just try to create a new URL to see if it is valid, we don't need it for anything
-                try{
-                    new URL (urlString);
-                    isSuccessful = true;
-                }
-                catch(MalformedURLException e){
-                    Log.d(TAG, "malformed url exception caught, error text shown");
-                    pref.setText("http://ohap.opimobi.com:18000/");
-                    Toast.makeText(getActivity()
-                            ,getString(R.string.prefences_urlError)
-                            ,Toast.LENGTH_LONG)
-                            .show();
-                }
-
-                return isSuccessful;
-            }
-        });
+        addUrlFieldPreferenceChangeListener(urlPreference);
 
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
@@ -108,5 +92,83 @@ public class SettingsFragment extends PreferenceFragment
             if(!preference.getKey().equals(KEY_EDIT_TEXT_PASSWORD))
                 editTextPreference.setSummary(editTextPreference.getText());
         }
+    }
+
+    private void addUrlFieldPreferenceChangeListener(EditTextPreference preference){
+
+        preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+
+                boolean isSuccessful = false;
+                EditTextPreference pref = (EditTextPreference) preference;
+                String urlString = (String)newValue;
+
+                //just try to create a new URL to see if it is valid, we don't need it for anything
+                try{
+                    new URL (urlString);
+                    isSuccessful = true;
+                }
+                catch(MalformedURLException e){
+                    Log.d(TAG, "malformed url exception caught, error text shown");
+                    pref.setText("http://ohap.opimobi.com:18000/");
+                    Toast.makeText(getActivity()
+                            ,getString(R.string.prefences_urlError)
+                            ,Toast.LENGTH_LONG)
+                            .show();
+                }
+
+                return isSuccessful;
+            }
+        });
+
+    }
+
+    public void addNewServer(){
+
+
+        //Help for this gotten from inazaruk's response on
+        // http://stackoverflow.com/questions/6129384/programatically-populating-preferences-with-checkboxes
+
+        // add the original categories into the preference
+        preferenceScreen.addPreference(getPreferenceManager().findPreference("DEFAULT_DEVICE_PREFERENCE_CATEGORY"));
+        preferenceScreen.addPreference(getPreferenceManager().findPreference("DEFAULT_SERVER_PREFERENCE_CATEGORY"));
+
+
+        PreferenceCategory category  = new PreferenceCategory(getActivity());
+
+        String preferenceKey = "Server " + serverNumber;
+
+        category.setTitle(preferenceKey);
+        serverNumber++;
+
+        preferenceScreen.addPreference(category);
+
+        EditTextPreference newUrlPreference = new EditTextPreference(getActivity());
+        newUrlPreference.setTitle("URL");
+        newUrlPreference.setKey(preferenceKey);
+        addUrlFieldPreferenceChangeListener(newUrlPreference);
+
+
+        ServerPreferenceManager.getInstance().addUrl(preferenceKey);
+
+        category.addPreference(newUrlPreference);
+
+        EditTextPreference newUserNamePreference  = new EditTextPreference(getActivity());
+        newUserNamePreference.setTitle(getActivity().getResources().getString(R.string.preferences_userName));
+        newUserNamePreference.setKey(preferenceKey + "_UserName");
+
+        category.addPreference(newUserNamePreference);
+
+        EditTextPreference newPasswordPreference = new EditTextPreference(getActivity());
+        newPasswordPreference.setTitle(getActivity().getResources().getString(R.string.preferences_password));
+        newPasswordPreference.setKey(preferenceKey + "_Password");
+
+        category.addPreference(newPasswordPreference);
+
+
+
+        setPreferenceScreen(preferenceScreen);
+
     }
 }

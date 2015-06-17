@@ -41,6 +41,7 @@ import java.util.Random;
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.ohap.CentralUnitConnection;
 import fi.oulu.tol.esde21.ohapclientesde21.ohap.ConnectionManager;
+import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.CentralUnit;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Container;
 import fi.oulu.tol.esde21.ohapclientesde21.opimobi_ohap_files.Device;
 
@@ -74,7 +75,7 @@ public class DeviceActivity extends Activity implements SensorEventListener {
     //for stopping the thread when activity pauses
     volatile boolean activityStopping;
 
-    private CentralUnitConnection centralUnit;
+    private CentralUnit centralUnit;
     private URL centralUnitUrl;
 
     private SensorManager mSensorManager;
@@ -118,7 +119,22 @@ public class DeviceActivity extends Activity implements SensorEventListener {
             Log.d(TAG, "onCreate malformedURLexception");
         }
         Log.d(TAG, "central unit url is: " + centralUnitUrl);
-        centralUnit = ConnectionManager.getInstance().getCentralUnit(centralUnitUrl);
+
+
+
+        // IN THE REAL APPLICATION DELETE THIS IF, IN REAL APPLICATION WE WILL ONLY HAVE
+        // REAL CENTRAL UNITS AND NO DUMMY CENTRAL UNITS
+        if(centralUnitUrl.toString().equals("http://ohap.opimobi.com:18000/")) {
+            Log.d(TAG, "REAL CENTRAL UNIT DETECTED");
+            centralUnit = ConnectionManager.getInstance().getCentralUnit(centralUnitUrl);
+        }
+        else {
+            Log.d(TAG, "DUMMY CENTRAL UNIT DETECTED");
+            centralUnit = ConnectionManager.getInstance().getDummyCentralUnit(centralUnitUrl);
+        }
+
+
+
         thisActivity = this;
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 

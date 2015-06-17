@@ -12,6 +12,7 @@ import android.view.View;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.ohap.CentralUnitConnection;
@@ -42,7 +43,6 @@ public class EntryActivity extends Activity {
         SharedPreferences sharedPref = PreferenceManager
                 .getDefaultSharedPreferences(this);
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         try {
             Log.d(TAG, "creating new Central unit");
             URL url = new URL(sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_PREFERENCE, getString(R.string.pref_URL_default)));
@@ -54,6 +54,7 @@ public class EntryActivity extends Activity {
         catch (MalformedURLException e){
             Log.d(TAG, "ERROR: URL stored in preferences was invalid. Why wasn't this checked in preferences?");
         }
+
 
 
     }
@@ -85,10 +86,11 @@ public class EntryActivity extends Activity {
     public void onEnterButtonClicked(View v){
 
         Intent i = new Intent(this, ItemListActivity.class);
-        Log.d(TAG, "putting extras in, CU name: "+ centralUnit.getName());
+        Log.d(TAG, "putting extras in, CU name: " + centralUnit.getName());
         i.putExtra(ItemListActivity.EXTRA_CONTAINER_ID, centralUnit.getId());
         i.putExtra(EXTRA_PREFIX_STRING, centralUnit.getName());
-        i.putExtra(ItemListActivity.EXTRA_CENTRAL_UNIT_URL, centralUnit.getURL().toString());
+        //i.putExtra(ItemListActivity.EXTRA_CENTRAL_UNIT_URL, centralUnit.getURL().toString());
+        i.putExtra(ItemListActivity.EXTRA_CENTRAL_UNIT_URL, ItemListActivity.EXTRA_NULL_CENTRAL_UNIT);
         startActivity(i);
     }
 

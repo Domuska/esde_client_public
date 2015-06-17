@@ -1,7 +1,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="fi.oulu.tol.esde21.ohapclientesde21.ohap_client.SettingsFragment">
+    tools:context="fi.oulu.tol.esde21.ohapclientesde21.ohap_client.SettingsFragment"
+    android:id="@+id/fragment_settings">
 
 
 

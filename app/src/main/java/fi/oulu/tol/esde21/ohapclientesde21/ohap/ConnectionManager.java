@@ -52,4 +52,9 @@ public class ConnectionManager {
         return connections.get(url);
     }
 
+    public DummyCentralUnitConnection getDummyCentralUnit(URL url){
+
+        return new DummyCentralUnitConnection(url);
+    }
+
 }

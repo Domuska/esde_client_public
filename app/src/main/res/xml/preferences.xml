@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
     <PreferenceCategory
-        android:title="@string/preferenceCategory_server">
+        android:title="@string/preferenceCategory_sensors"
+        android:key="DEFAULT_DEVICE_PREFERENCE_CATEGORY">
+
+
+        <ListPreference
+            android:key="@string/pref_field_sensorlist"
+            android:title="@string/preferences_chooseSensor"
+            android:entries="@array/pref_sensorlist_entries"
+            android:entryValues="@array/pref_sensorlist_entryvalues"
+            android:defaultValue="None" />
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="@string/preferenceCategory_server"
+        android:key="DEFAULT_SERVER_PREFERENCE_CATEGORY">
 
         <EditTextPreference
             android:key="@string/pref_field_URL"
@@ -9,11 +26,6 @@
             android:summary=""
             android:defaultValue="@string/pref_URL_default" />
 
-    </PreferenceCategory>
-
-
-    <PreferenceCategory
-        android:title="@string/preferenceCategory_loginInfo">
 
         <EditTextPreference
             android:key="@string/pref_field_userName"
@@ -25,22 +37,7 @@
             android:title="@string/preferences_password"
             android:defaultValue="@string/pref_password_default"/>
 
-    </PreferenceCategory>
-
-    <PreferenceCategory
-        android:title="@string/preferenceCategory_sensors" >
-
-<!--        <CheckBoxPreference
-            android:key="@string/pref_field_sensor"
-            android:title="@string/preferences_setSensor"
-            android:defaultValue="true" />-->
-
-        <ListPreference
-            android:key="@string/pref_field_sensorlist"
-            android:title="@string/preferences_chooseSensor"
-            android:entries="@array/pref_sensorlist_entries"
-            android:entryValues="@array/pref_sensorlist_entryvalues"
-            android:defaultValue="None" />
 
     </PreferenceCategory>
+
 </PreferenceScreen>

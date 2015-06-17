@@ -3,6 +3,14 @@
 Tomi Lämsä, 2185538, lamsatom@gmail.com
 Juhana Pikkarainen, 1957819, juhana.pikkarainen@gmail.com
 
+Updated (17.6.2015) usage instructions:
+
+A possibility to "connect" to multiple servers has been added. The functionality works with dummy data (since no real servers are available to be connected to), and some code regarding this was added. In order to get new servers visible one should go to settings and add a new server (through the action bar overflow menu). URL, user name and password can be added but are not necessary since the application doesn't actually try to connect anywhere with that information. After doing this the new server should appear in the list activity (that you can enter through the ENTER button in entry screen). The real OHAP test server is always accessible through this list of servers also.
+
+The dummy servers all just have name "dummy server" and contain the same 3 devices and one container in them, this data is only to showcase how it would look when connecting to a real server that sends back real data. The URL that is entered for the server only shows in the list where you choose which server you wish to view.
+
+Note: there's a bug in the settings screen, when you enter it again after adding new server(s) you will only see the default OHAP server. If you add additional servers through the overflow menu the servers should appear one by one with the information that you have filled in earlier, this is just a problem with creating the UI of the SettingsFragment, the preferences you have set earlier should nevertheless be saved and be accessible.
+
 Build instructions:
 
 There are errors reported in DeviceActivity about too low minimum API levels, but these shouldn't be a problem, the code should compile and function properly anyway. 
