@@ -77,7 +77,7 @@ public class ItemListActivity extends Activity {
             String[] urlList = new String[preferenceKeyArray.size()];
 
             for(int i = 0; i < preferenceKeyArray.size(); i++){
-
+                Log.d(TAG, "preference found: " +  preferenceKeyArray.get(i));
                 urlList[i] = sharedPref.getString(preferenceKeyArray.get(i), "default url");
             }
 
@@ -93,7 +93,6 @@ public class ItemListActivity extends Activity {
 
                     try {
                         URL url = new URL(sharedPref.getString(preferenceKeyArray.get(position), "https://www.google.fi"));
-
 
 
                         Intent i = new Intent(ItemListActivity.this, ItemListActivity.class);

@@ -17,7 +17,7 @@ public class ServerPreferenceManager extends Activity{
 
     private ServerPreferenceManager(){
         //for now we will make sure the opimobi test server is on the list of URLs always
-        preferenceKeyList.add("pref_key_URL");
+        //preferenceKeyList.add("Server 1");
     }
 
 
@@ -29,10 +29,10 @@ public class ServerPreferenceManager extends Activity{
         return serverPreferenceManager;
     }
 
-    public void addUrl(String url){
+    public void addKey(String key){
 
-        if(!preferenceKeyList.contains(url)) {
-            preferenceKeyList.add(url);
+        if(!preferenceKeyList.contains(key)) {
+            preferenceKeyList.add(key);
 
         }
 

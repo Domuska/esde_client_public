@@ -12,7 +12,6 @@ import android.view.View;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 import fi.oulu.tol.esde21.ohapclientesde21.ohap.CentralUnitConnection;
@@ -40,14 +39,38 @@ public class EntryActivity extends Activity {
         super.onStart();
         Log.d(TAG, "onStart method starting");
 
-        SharedPreferences sharedPref = PreferenceManager
+        SharedPreferences sharedPreferences = PreferenceManager
                 .getDefaultSharedPreferences(this);
+
+        // if the sharedpreference number of servers is 0, we're starting app up for the very first time
+        // set number of servers in the sharedprefs to 1 since OHAP test server is saved there nevertheless
+        if(sharedPreferences.getInt(SettingsFragment.KEY_NUMBER_OF_SERVERS, 0) == 0) {
+
+
+            PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(SettingsFragment.KEY_NUMBER_OF_SERVERS, 1);
+            editor.commit();
+        }
+
+        Log.d(TAG, "number of servers in entryActivity: " + sharedPreferences.getInt(SettingsFragment.KEY_NUMBER_OF_SERVERS, -1));
+
+
+        int numberOfServers = sharedPreferences.getInt(SettingsFragment.KEY_NUMBER_OF_SERVERS, 0);
+
+        // initialize ServerPreferenceManager array with the number of servers that is actually stored in shared prefs
+        for(int i = 0; i < numberOfServers; i++){
+
+            ServerPreferenceManager.getInstance().addKey("Server " + (i + 1));
+            Log.d(TAG, "added server number " + (i+1) + " to ServerPreferenceManager");
+        }
+
 
         try {
             Log.d(TAG, "creating new Central unit");
-            URL url = new URL(sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_PREFERENCE, getString(R.string.pref_URL_default)));
-            String userName = sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_USERNAME, getString(R.string.pref_userName_default));
-            String password = sharedPref.getString(SettingsFragment.KEY_EDIT_TEXT_PASSWORD, getString(R.string.pref_password_default));
+            URL url = new URL(sharedPreferences.getString(SettingsFragment.KEY_EDIT_TEXT_PREFERENCE, getString(R.string.pref_URL_default)));
+            String userName = sharedPreferences.getString(SettingsFragment.KEY_EDIT_TEXT_USERNAME, getString(R.string.pref_userName_default));
+            String password = sharedPreferences.getString(SettingsFragment.KEY_EDIT_TEXT_PASSWORD, getString(R.string.pref_password_default));
             centralUnit = ConnectionManager.getInstance().getCentralUnit(url);
             centralUnit.setLoginCredentials(userName, password);
         }

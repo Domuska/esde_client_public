@@ -3,7 +3,6 @@ package fi.oulu.tol.esde21.ohapclientesde21.ohap_client;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.Preference;
 import android.preference.PreferenceCategory;
@@ -11,27 +10,27 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import android.util.Log;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 
 import fi.oulu.tol.esde21.ohapclientesde21.R;
 
 public class SettingsFragment extends PreferenceFragment
         implements SharedPreferences.OnSharedPreferenceChangeListener{
 
-    public static final String KEY_EDIT_TEXT_PREFERENCE = "pref_key_URL";
+    public static final String KEY_EDIT_TEXT_PREFERENCE = "Server 1";
     public static final String KEY_EDIT_TEXT_USERNAME = "pref_key_userName";
     public static final String KEY_EDIT_TEXT_PASSWORD = "pref_key_password";
     public static final String KEY_LIST_SENSOR = "pref_key_sensorlist";
+    public static final String KEY_NUMBER_OF_SERVERS = "pref_key_number_of_servers";
 
     private final String TAG = "SettingsFragment";
 
     private PreferenceScreen preferenceScreen;
-    private int serverNumber = 2;
+    private int numberOfServers;
+    SharedPreferences sharedPreferences;
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -44,6 +43,10 @@ public class SettingsFragment extends PreferenceFragment
         addPreferencesFromResource(R.xml.preferences);
 
         preferenceScreen = getPreferenceManager().createPreferenceScreen(getActivity());
+
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        numberOfServers = sharedPreferences.getInt(KEY_NUMBER_OF_SERVERS, -1);
 
 
         //set summary for the user name preference
@@ -137,10 +140,12 @@ public class SettingsFragment extends PreferenceFragment
 
         PreferenceCategory category  = new PreferenceCategory(getActivity());
 
-        String preferenceKey = "Server " + serverNumber;
+        numberOfServers++;
 
-        category.setTitle(preferenceKey);
-        serverNumber++;
+        String preferenceKey = "Server " + numberOfServers;
+
+        category.setTitle(preferenceKey + " preferences");
+
 
         preferenceScreen.addPreference(category);
 
@@ -150,7 +155,7 @@ public class SettingsFragment extends PreferenceFragment
         addUrlFieldPreferenceChangeListener(newUrlPreference);
 
 
-        ServerPreferenceManager.getInstance().addUrl(preferenceKey);
+        ServerPreferenceManager.getInstance().addKey(preferenceKey);
 
         category.addPreference(newUrlPreference);
 
@@ -165,6 +170,14 @@ public class SettingsFragment extends PreferenceFragment
         newPasswordPreference.setKey(preferenceKey + "_Password");
 
         category.addPreference(newPasswordPreference);
+
+
+        //update the amount of servers number that is stored in sharedpreferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(KEY_NUMBER_OF_SERVERS, (numberOfServers));
+        editor.commit();
+
+        Log.d(TAG, "number of servesr is now : " + sharedPreferences.getInt(KEY_NUMBER_OF_SERVERS, -1));
 
 
 
