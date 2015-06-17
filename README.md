@@ -5,7 +5,9 @@ Juhana Pikkarainen, 1957819, juhana.pikkarainen@gmail.com
 
 Updated (17.6.2015) usage instructions:
 
-A possibility to "connect" to multiple servers has been added. The functionality works with dummy data (since no real servers are available to be connected to), and some code regarding this was added. In order to get new servers visible one should go to settings and add a new server (through the action bar overflow menu). URL, user name and password can be added but are not necessary since the application doesn't actually try to connect anywhere with that information. After doing this the new server should appear in the list activity (that you can enter through the ENTER button in entry screen). The real OHAP test server is always accessible through this list of servers also.
+A possibility to "connect" to multiple servers has been added. The functionality works with dummy data (since no real servers are available to be connected to), and some code regarding this was added. In order to get new servers visible one should go to settings and add a new server (through the action bar overflow menu). URL, user name and password can be added but are not necessary since the application doesn't actually try to connect anywhere with that information. After doing this the new server should appear in the list activity (that you can enter through the ENTER button in entry screen).
+
+For now the application works so that if the URL you set for a central unit connection is not http://ohap.opimobi.com:18000/, the server will be considered as "dummy" server and the dummy data will be shown. In the real application if the URL set for the central unit was not a valid an URL that sends an answer, the application should just show an empty list.
 
 The dummy servers all just have name "dummy server" and contain the same 3 devices and one container in them, this data is only to showcase how it would look when connecting to a real server that sends back real data. The URL that is entered for the server only shows in the list where you choose which server you wish to view.
 
